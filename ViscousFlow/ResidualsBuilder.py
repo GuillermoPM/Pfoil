@@ -4,20 +4,23 @@ from ViscousFlow.ViscAuxEq import *
 
 
 def residual_transition(M, param, x, U, Aux):
-	# calculates the combined lam + turb residual for a transition station
-	# INPUT
-	#   param : parameter structure
-	#   x     : 2x1 vector, [x1, x2], containing xi values at the points
-	#   U     : 4x2 matrix, [U1, U2], containing the states at the points
-	#   Aux   : ()x2 matrix, [Aux1, Aux2] of auxiliary data at the points
-	# OUTPUT
-	#   R     : 3x1 transition residual vector
-	#   R_U   : 3x8 residual Jacobian, [R_U1, R_U2]
-	#   R_x   : 3x2 residual linearization w.r.t. x, [R_x1, R_x2]
-	# DETAILS
-	#   The state U1 should be laminar; U2 should be turbulent
-	#   Calculates and linearizes the transition location in the process
-	#   Assumes linear variation of th and ds from U1 to U2
+	"""
+	Calculates the combined lam + turb residual for a transition station
+	
+	INPUT
+	  param : parameter structure
+	  x     : 2x1 vector, [x1, x2], containing xi values at the points
+	  U     : 4x2 matrix, [U1, U2], containing the states at the points
+	  Aux   : ()x2 matrix, [Aux1, Aux2] of auxiliary data at the points
+	OUTPUT
+	  R     : 3x1 transition residual vector
+	  R_U   : 3x8 residual Jacobian, [R_U1, R_U2]
+	  R_x   : 3x2 residual linearization w.r.t. x, [R_x1, R_x2]
+	DETAILS
+	  The state U1 should be laminar; U2 should be turbulent
+	  Calculates and linearizes the transition location in the process
+	  Assumes linear variation of th and ds from U1 to U2
+	"""
 
 	# states
 	U1 = U[:, 0]
