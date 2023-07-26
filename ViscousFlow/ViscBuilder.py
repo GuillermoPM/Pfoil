@@ -112,7 +112,7 @@ def build_wake(M):
 
 	wakepanels = np.empty(Nw-1, dtype=object)
 	for i in range(Nw-1):
-		wakepanels[i] = WakePanel(coordmin=xyw[:,i], coordmax = xyw[:,i+1], i=i+1)
+		wakepanels[i] = Wakepanel(coordmin=xyw[:, i], coordmax=xyw[:, i+1], i=i+1)
 
 	# set values
 	M.wake.N = Nw
@@ -144,13 +144,15 @@ def wake_init(Foil, ue):
 
 
 def wake_sys(Foil, param):
-	# constructs residual system corresponding to wake initialization
-	# INPUT
-	#   param  : parameters
-	# OUTPUT
-	#   R   : 3x1 residual vector for th, ds, sa
-	#   R_U : 3x12 residual linearization, as three 3x4 blocks
-	#   J   : indices of the blocks of U in R_U (lower, upper, wake)
+	"""
+	constructs residual system corresponding to wake initialization
+	INPUT
+	  param  : parameters
+	OUTPUT
+	  R   : 3x1 residual vector for th, ds, sa
+	  R_U : 3x12 residual linearization, as three 3x4 blocks
+	  J   : indices of the blocks of U in R_U (lower, upper, wake)
+	"""
 
 	il = Foil.vsol.Is[0][-1]
 	Ul = Foil.glob.U[:, il]  # lower surface TE index, state
@@ -158,7 +160,7 @@ def wake_sys(Foil, param):
 	Uu = Foil.glob.U[:, iu]  # upper surface TE index, state
 	iw = Foil.vsol.Is[2][0]
 	Uw = Foil.glob.U[:, iw]  # first wake index, state
-	hTE = TE_info(Foil)[1]  # trailing-edge gap is hTE
+	hTE = trailing_specs(Foil)[1]  # trailing-edge gap is hTE
 
 	# Obtain wake shear stress from upper/lower; transition if not turb
 	param.turb = True
@@ -284,7 +286,7 @@ def set_wake_gap(Foil):
 	Uses cubic function to extrapolate the TE gap into the wake.
 	See Drela, IBL for Blunt Trailing Edges, 1989, 89-2166-CP.
 	"""
-	_, hTE, dtdx, _, _ = TE_info(Foil)
+	_, hTE, dtdx, _, _ = trailing_specs(Foil)
 	flen = 2.5  # length-scale factor
 	dtdx = min(max(dtdx, -3./flen), 3./flen)  # clip TE thickness slope
 	Lw = flen * hTE
@@ -320,8 +322,8 @@ def calc_ue_m(M):
 		for j, panel_j in enumerate(wakepanels):  # loop over wake panels
 
 			Xj = np.column_stack([panel_j.leftcoord, panel_j.midpt, panel_j.rightcoord])
-			lefthalf = WakePanel(panel_j.leftcoord, panel_j.midpt,j)
-			righthalf = WakePanel(panel_j.midpt, panel_j.rightcoord, j)
+			lefthalf = Wakepanel(panel_j.leftcoord, panel_j.midpt, j)
+			righthalf = Wakepanel(panel_j.midpt, panel_j.rightcoord, j)
 			if j == (Nw-2):
 				# ghost extension at last point
 				Xj[:, 2] = 2 * Xj[:, 2] - Xj[:, 1]
@@ -696,12 +698,13 @@ def thwaites_init(K, nu):
 
 
 def store_transition(M, side, i):
-	# stores xi and x transition locations using current M.vsol.xt
-	# INPUT
-	#   is,i : side,station number
-	# OUTPUT
-	#   M.vsol.Xt stores the transition location s and x values
-
+	"""
+	stores xi and x transition locations using current M.vsol.xt
+	INPUT
+	  is,i : side,station number
+	OUTPUT
+	  M.vsol.Xt stores the transition location s and x values
+	"""
 	xt = M.vsol.xt
 	i0 = M.vsol.Is[side][i-1]
 	i1 = M.vsol.Is[side][i]  # pre/post transition nodes
@@ -722,12 +725,14 @@ def store_transition(M, side, i):
 
 
 def stagpoint_move(M):
-	# moves the LE stagnation point on the airfoil using the global solution ue
-	# INPUT
-	#   M  : mfoil class with a valid solution in M.glob.U
-	# OUTPUT
-	#   New sstag, sstag_ue, xi in M.isol
-	#   Possibly new stagnation panel, Istag, and hence new surfaces and matrices
+	"""
+	moves the LE stagnation point on the airfoil using the global solution ue
+	INPUT
+	  M  : mfoil class with a valid solution in M.glob.U
+	OUTPUT
+	  New sstag, sstag_ue, xi in M.isol
+	  Possibly new stagnation panel, Istag, and hence new surfaces and matrices
+	"""
 
 	N = M.N  # number of points on the airfoil
 	I = M.isol.Istag  # current adjacent node indices
@@ -846,7 +851,8 @@ def solve_coupled(M):
 
 
 def update_state(M):
-	"""Updates state, taking into account physical constraints.
+	"""
+	Updates state, taking into account physical constraints.
 	
 	Args:
 		M (object): mfoil class with a valid solution (U) and proposed update (dU)

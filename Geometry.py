@@ -1,7 +1,7 @@
 """
 	## Geometry definition functions
 	>>> pannel \n
-	>>> Wakepannel \n
+	>>> Wakepanel \n
 	>>> Segment \n
 	>>> SplineGeom \n
 	>>> SplineLen \n
@@ -89,7 +89,7 @@ class Pannel():
 				') ' + ' ' + 'Lugar: ' + \
 				str(self.lug) + '\n' + 'V : ' + str(self.Vi)
 
-class Wakepannel(Pannel):
+class Wakepanel(Pannel):
 	"""
 		A wake pannel is a pannel whose location attribute is the wake
 	"""
