@@ -66,7 +66,7 @@ class Foil():
 			self.x = np.array([])
 			self.s = np.array([])
 			self.t = np.array([])
-			self.wpaneles = np.array([])
+			self.wpanels = np.array([])
 
 	class ViscSol:
 		def __init__(self):
@@ -91,19 +91,16 @@ class Foil():
 			self.s = np.array([])
 			self.wakelen = 1
 			self.foil_name = 'noname'
-			self.coord = np.array([])  # coordenadas del perfil x · N, y · N
-			self.xref = np.array([0.25, 0] ) # centro de referencia para los momentos
-			self.paneles = np.array([])  # paneles en los que se divide el perfil
-			self.wakepanels = np.array([])  # paneles en los que se divide la estela
-			self.totalpanels = np.concatenate((self.paneles, self.wakepanels))
+			self.coord = np.array([])  				# foil coordinates x · N, y · N
+			self.xref = np.array([0.25, 0] ) 		# centre for momentum calculation
+			self.panels = np.array([])  			# foil panels
+			self.wakepanels = np.array([])  		# wakepanels
+			self.totalpanels = np.concatenate((self.panels, self.wakepanels))
 			self.spline_sup = type(object)
 			self.spline_inf = type(object)
-			self.cylRadious = 0.5
-			self.special = False
 			self.presc = True
 			self.name = "NACA"
 			self.nPoints = 0
-			self.spgeom = 0
 
 	class Results:
 		def __init__(self):
@@ -129,22 +126,22 @@ class Foil():
 	class Param:
 		def __init__(self):
 			self.verb = 1
-			self.rtol = 1e-10  # Tolerancia Newton
+			self.rtol = 1e-10	# Newton tolerance
 			self.niglob = 200
 			self.doplot = True
 			self.axplot = []
 
-			# Parámetros caso viscoso
+			# Viscous case parameters
 			self.ncrit = 9.0
 			self.Cuq = 1.0
 			self.Dlr = 0.9
 			self.SlagK = 5.6
 
-			# Ctau inicial tras la transición
+			# initial Ct after transition
 			self.CtauC = 1.8
 			self.CtauE = 3.3
 
-			# G Beta constantes
+			# G Beta constants
 			self.GA = 6.7
 			self.GB = 0.75
 			self.GC = 18.0
@@ -182,7 +179,7 @@ class Foil():
 			self.foil_dir = ''
 
 	def __init__(self, coord, N=199, foil='NACA 0012'):
-		# Inicialización de las variables del perfil
+		# foil variable initialization
 		self.geom = self.GeomParam()
 		self.param = self.Param()
 		self.isol = self.InvSol()
@@ -194,18 +191,15 @@ class Foil():
 		self.cvortm = self.ConstantVortexSol()
 		self.data = self.Data()
 
-		# Inicialización de los parámetros de entrada del perfil
-		self.N = N  # Número de paneles
+		# input parameters initialization
+		self.N = N  # panel number
 		self.geom.foil_name = foil
 		self.geom.coord = coord
 
 
 
 	def FoilInit(self):
-		# self.PanelDiv()
-
-		if self.geom.spgeom != 1:
-			self.FoilSpline()
+		self.FoilSpline()
 			
 
 	def FoilSpline(self):	
@@ -215,12 +209,12 @@ class Foil():
 
 	def PanelDiv(self):
 		if self.oper.model == 0:
-			self.geom.paneles = division_paneles_CVPM(
+			self.geom.panels = panel_division_CVPM(
 				coord=self.geom.coord,
 				N=self.N,
 				foil_name=self.geom.foil_name)[0]
 		else:
-			self.geom.paneles = division_paneles(
+			self.geom.panels = panel_division(
 				coord=self.geom.coord,
 				N=self.N,
 				foil_name=self.geom.foil_name,

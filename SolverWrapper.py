@@ -26,12 +26,12 @@ def PfoilBuilder(GUIParameters):
 	if not fromfile:  # NACA generated airfoil
 		naca_foil = NacaFoil(foil_name=GUIParameters.nacafoil, model = GUIParameters.model)[2]
 		if GUIParameters.model == 0:
-			paneles, coords = pannel_division_CVPM(
+			paneles, coords = panel_division_CVPM(
                     coord=naca_foil,
                     N=GUIParameters.nPanels,
                     foil_name=GUIParameters.nacafoil)
 		else:
-			paneles, coords = pannel_division(
+			paneles, coords = panel_division(
 						coord = naca_foil,
 						N=GUIParameters.nPanels,
 						foil_name=GUIParameters.nacafoil,
@@ -39,21 +39,21 @@ def PfoilBuilder(GUIParameters):
 		
 		foil = Foil(coord=coords, N=GUIParameters.nPanels,
 		            foil=GUIParameters.nacafoil)
-		foil.geom.paneles = paneles
+		foil.geom.panels = paneles
 		
 	
 	else:
 		file_coords = OpenFile(file)
 		if all(file_coords[1:20, 1] > 0):
 			file_coords = np.flip(file_coords,axis= 0)
-		paneles, coords = pannel_division(
+		paneles, coords = panel_division(
                     coord=file_coords,
                     N=GUIParameters.nPanels,
                     foil_name=GUIParameters.nacafoil,
                		presc=GUIParameters.presc)
 		foil = Foil(coord=coords, N=GUIParameters.nPanels,
 		            foil=GUIParameters.nacafoil)
-		foil.geom.paneles = paneles
+		foil.geom.panels = paneles
 	
 		
 	foil.FoilInit()  # Inicialización del perfil

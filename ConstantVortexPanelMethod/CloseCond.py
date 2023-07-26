@@ -11,60 +11,60 @@ def KuttaMatrix(Foil):
 	"""
 	Calculates the Kutta condition for each pannel.
 	"""
-	paneles = Foil.geom.paneles
+	panels = Foil.geom.panels
 	N = Foil.N
 	KuttaCond = np.zeros(N+1, float)
 
 	# First source contribution on the last one
 	KuttaCond[0] = 0.5/np.pi*integrate.quad(lambda s:
-											((paneles[N-1].midx-(paneles[0].xmin-s*np.sin(paneles[0].beta)))*(-np.sin(paneles[N-1].beta))
-											 + (paneles[N-1].midy-(paneles[0].ymin+s*np.cos(paneles[0].beta)))*(np.cos(paneles[N-1].beta))) /
-											((paneles[N-1].midx-(paneles[0].xmin-s*np.sin(paneles[0].beta)))**2 +
-												(paneles[N-1].midy-(paneles[0].ymin+s*np.cos(paneles[0].beta)))**2), 0, paneles[0].len)[0]
+											((panels[N-1].midx-(panels[0].xmin-s*np.sin(panels[0].beta)))*(-np.sin(panels[N-1].beta))
+											 + (panels[N-1].midy-(panels[0].ymin+s*np.cos(panels[0].beta)))*(np.cos(panels[N-1].beta))) /
+											((panels[N-1].midx-(panels[0].xmin-s*np.sin(panels[0].beta)))**2 +
+												(panels[N-1].midy-(panels[0].ymin+s*np.cos(panels[0].beta)))**2), 0, panels[0].len)[0]
 
 	# Last source contribution on the first one
 	KuttaCond[N-1] = 0.5/np.pi*integrate.quad(lambda s:
-											  ((paneles[0].midx-(paneles[N-1].xmin-s*np.sin(paneles[N-1].beta)))*(-np.sin(paneles[0].beta))
-											   + (paneles[0].midy-(paneles[N-1].ymin+s*np.cos(paneles[N-1].beta)))*(np.cos(paneles[0].beta))) /
-											  ((paneles[0].midx-(paneles[N-1].xmin-s*np.sin(paneles[N-1].beta)))**2 +
-												  (paneles[0].midy-(paneles[N-1].ymin+s*np.cos(paneles[N-1].beta)))**2), 0, paneles[N-1].len)[0]
+											  ((panels[0].midx-(panels[N-1].xmin-s*np.sin(panels[N-1].beta)))*(-np.sin(panels[0].beta))
+											   + (panels[0].midy-(panels[N-1].ymin+s*np.cos(panels[N-1].beta)))*(np.cos(panels[0].beta))) /
+											  ((panels[0].midx-(panels[N-1].xmin-s*np.sin(panels[N-1].beta)))**2 +
+												  (panels[0].midy-(panels[N-1].ymin+s*np.cos(panels[N-1].beta)))**2), 0, panels[N-1].len)[0]
 
 	# First vortex contribution on the last one
 	KuttaCond[N] -= 0.5/np.pi*integrate.quad(lambda s:
-											 ((paneles[-1].midx-(paneles[0].xmin-s*np.sin(paneles[0].beta)))*(np.cos(paneles[-1].beta))
-											  + (paneles[-1].midy-(paneles[0].ymin+s*np.cos(paneles[0].beta)))*(np.sin(paneles[-1].beta))) /
-											 ((paneles[-1].midx-(paneles[0].xmin-s*np.sin(paneles[0].beta)))**2 +
-											  (paneles[-1].midy-(paneles[0].ymin+s*np.cos(paneles[0].beta)))**2), 0, paneles[0].len)[0]
+											 ((panels[-1].midx-(panels[0].xmin-s*np.sin(panels[0].beta)))*(np.cos(panels[-1].beta))
+											  + (panels[-1].midy-(panels[0].ymin+s*np.cos(panels[0].beta)))*(np.sin(panels[-1].beta))) /
+											 ((panels[-1].midx-(panels[0].xmin-s*np.sin(panels[0].beta)))**2 +
+											  (panels[-1].midy-(panels[0].ymin+s*np.cos(panels[0].beta)))**2), 0, panels[0].len)[0]
 
 	# Last vortex contribution on the first one
 	KuttaCond[N] -= 0.5/np.pi*integrate.quad(lambda s:
-											 ((paneles[0].midx-(paneles[-1].xmin-s*np.sin(paneles[-1].beta)))*(np.cos(paneles[0].beta))
-											  + (paneles[0].midy-(paneles[-1].ymin+s*np.cos(paneles[-1].beta)))*(np.sin(paneles[0].beta))) /
-											 ((paneles[0].midx-(paneles[-1].xmin-s*np.sin(paneles[-1].beta)))**2 +
-											  (paneles[0].midy-(paneles[-1].ymin+s*np.cos(paneles[-1].beta)))**2), 0, paneles[-1].len)[0]
+											 ((panels[0].midx-(panels[-1].xmin-s*np.sin(panels[-1].beta)))*(np.cos(panels[0].beta))
+											  + (panels[0].midy-(panels[-1].ymin+s*np.cos(panels[-1].beta)))*(np.sin(panels[0].beta))) /
+											 ((panels[0].midx-(panels[-1].xmin-s*np.sin(panels[-1].beta)))**2 +
+											  (panels[0].midy-(panels[-1].ymin+s*np.cos(panels[-1].beta)))**2), 0, panels[-1].len)[0]
 
 	KuttaCond[N] -= 1
 
-	for i, panel in enumerate(paneles[1:-1]):
+	for i, panel in enumerate(panels[1:-1]):
 		KuttaCond[i+1] = 0.5/np.pi*(integrate.quad(lambda s:
-												   ((paneles[0].midx-(panel.xmin-s*np.sin(panel.beta)))*(-np.sin(paneles[0].beta))
-													+ (paneles[0].midy-(panel.ymin+s*np.cos(panel.beta)))*(np.cos(paneles[0].beta))) /
-												   ((paneles[0].midx-(panel.xmin-s*np.sin(panel.beta)))**2 +
-													   (paneles[0].midy-(panel.ymin+s*np.cos(panel.beta)))**2), 0, panel.len)[0] + integrate.quad(lambda s:
-																																				  ((paneles[-1].midx-(panel.xmin-s*np.sin(panel.beta)))*(-np.sin(paneles[-1].beta))
-																																				   + (paneles[-1].midy-(panel.ymin+s*np.cos(panel.beta)))*(np.cos(paneles[-1].beta))) /
-																																				  ((paneles[-1].midx-(panel.xmin-s*np.sin(panel.beta)))**2 +
-																																					  (paneles[-1].midy-(panel.ymin+s*np.cos(panel.beta)))**2), 0, panel.len)[0])
+												   ((panels[0].midx-(panel.xmin-s*np.sin(panel.beta)))*(-np.sin(panels[0].beta))
+													+ (panels[0].midy-(panel.ymin+s*np.cos(panel.beta)))*(np.cos(panels[0].beta))) /
+												   ((panels[0].midx-(panel.xmin-s*np.sin(panel.beta)))**2 +
+													   (panels[0].midy-(panel.ymin+s*np.cos(panel.beta)))**2), 0, panel.len)[0] + integrate.quad(lambda s:
+																																				  ((panels[-1].midx-(panel.xmin-s*np.sin(panel.beta)))*(-np.sin(panels[-1].beta))
+																																				   + (panels[-1].midy-(panel.ymin+s*np.cos(panel.beta)))*(np.cos(panels[-1].beta))) /
+																																				  ((panels[-1].midx-(panel.xmin-s*np.sin(panel.beta)))**2 +
+																																					  (panels[-1].midy-(panel.ymin+s*np.cos(panel.beta)))**2), 0, panel.len)[0])
 
 		KuttaCond[N] -= 0.5/np.pi*(integrate.quad(lambda s:
-												  ((paneles[0].midx-(panel.xmin-s*np.sin(panel.beta)))*(np.cos(paneles[0].beta))
-												   + (paneles[0].midy-(panel.ymin+s*np.cos(panel.beta)))*(np.sin(paneles[0].beta))) /
-												  ((paneles[0].midx-(panel.xmin-s*np.sin(panel.beta)))**2 +
-												   (paneles[0].midy-(panel.ymin+s*np.cos(panel.beta)))**2), 0, panel.len)[0] + integrate.quad(lambda s:
-																																			  ((paneles[-1].midx-(panel.xmin-s*np.sin(panel.beta)))*(np.cos(paneles[-1].beta))
-																																			   + (paneles[-1].midy-(panel.ymin+s*np.cos(panel.beta)))*(np.sin(paneles[-1].beta))) /
-																																			  ((paneles[-1].midx-(panel.xmin-s*np.sin(panel.beta)))**2 +
-																																			   (paneles[-1].midy-(panel.ymin+s*np.cos(panel.beta)))**2), 0, panel.len)[0])
+												  ((panels[0].midx-(panel.xmin-s*np.sin(panel.beta)))*(np.cos(panels[0].beta))
+												   + (panels[0].midy-(panel.ymin+s*np.cos(panel.beta)))*(np.sin(panels[0].beta))) /
+												  ((panels[0].midx-(panel.xmin-s*np.sin(panel.beta)))**2 +
+												   (panels[0].midy-(panel.ymin+s*np.cos(panel.beta)))**2), 0, panel.len)[0] + integrate.quad(lambda s:
+																																			  ((panels[-1].midx-(panel.xmin-s*np.sin(panel.beta)))*(np.cos(panels[-1].beta))
+																																			   + (panels[-1].midy-(panel.ymin+s*np.cos(panel.beta)))*(np.sin(panels[-1].beta))) /
+																																			  ((panels[-1].midx-(panel.xmin-s*np.sin(panel.beta)))**2 +
+																																			   (panels[-1].midy-(panel.ymin+s*np.cos(panel.beta)))**2), 0, panel.len)[0])
 	Foil.cvortm.kuttaCond = KuttaCond
 
 
@@ -73,15 +73,15 @@ def TangVel(Foil):
 	Gives the tangencial velocity generated by the vortex and source sheet
 	
 	"""
-	paneles = Foil.geom.paneles
+	panels = Foil.geom.panels
 	N = Foil.N
 	
 	Vt_Matrix = np.empty((N, N+1), dtype=float)
 	np.fill_diagonal(Vt_Matrix, 0.0)
 
-	for i, panel_i in enumerate(paneles):
+	for i, panel_i in enumerate(panels):
 		Vt_Matrix[i, N] = -0.5  # Contribución gamma/2 de cada panel
-		for j, panel_j in enumerate(paneles):
+		for j, panel_j in enumerate(panels):
 			if j != i:
 				Vt_Matrix[i, j] = 0.5/np.pi*integrate.quad(lambda s: ((panel_i.midx-(panel_j.xmin-s*np.sin(panel_j.beta)))*(-np.sin(panel_i.beta))
 																	  + (panel_i.midy-(panel_j.ymin+s*np.cos(panel_j.beta)))*(np.cos(panel_i.beta))) /

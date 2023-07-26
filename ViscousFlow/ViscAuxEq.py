@@ -89,23 +89,27 @@ def get_de(U, param):
 
 
 def get_cfxt(U, x, param):
-	# calculates cf*x/theta from the state
-	# INPUT
-	#   U     : state vector [th; ds; sa; ue]
-	#   x     : distance along wall (xi)
-	#   param : parameter structure
-	# OUTPUT
-	#   cfxt,  : the combination cf*x/theta (calls cf function)
-	#   cfxt_U : linearization w.r.t. U (1x4)
-	#   cfxt_x : linearization w.r.t x (scalar)
-	# DETAILS
-	#   This combination appears in the momentum and shape parameter equations
+	"""	
+	calculates cf*x/theta from the state
+	INPUT
+	  U     : state vector [th; ds; sa; ue]
+	  x     : distance along wall (xi)
+	  param : parameter structure
+	OUTPUT
+	  cfxt,  : the combination cf*x/theta (calls cf function)
+	  cfxt_U : linearization w.r.t. U (1x4)
+	  cfxt_x : linearization w.r.t x (scalar)
+	DETAILS
+	  This combination appears in the momentum and shape parameter equations
+
+	"""
 
 	cf, cf_U = get_cf(U, param)
 	cfxt = cf * x / U[0]
 	cfxt_U = cf_U * x / U[0]
 	cfxt_U[0] = cfxt_U[0] - cfxt / U[0]
 	cfxt_x = cf / U[0]
+
 	return cfxt, cfxt_U, cfxt_x
 
 
@@ -132,10 +136,7 @@ def get_cdutstag(U, param):
 	else:
 		Hk1 = Hk - 4
 		num = -0.0016 * Hk1 ** 2 / (1 + 0.02 * Hk1 ** 2) + 0.207
-		num_Hk = (
-			-0.0016
-			* (2 * Hk1 / (1 + 0.02 * Hk1 ** 2) - Hk1 ** 2 / (1 + 0.02 * Hk1 ** 2) ** 2 * 0.02 * 2 * Hk1)
-		)
+		num_Hk = (-0.0016 * (2 * Hk1 / (1 + 0.02 * Hk1 ** 2) - Hk1 ** 2 / (1 + 0.02 * Hk1 ** 2) ** 2 * 0.02 * 2 * Hk1))
 
 	nu = param.mu0 / param.rho0
 	D = nu * num
@@ -282,14 +283,16 @@ def get_cDi_lam(U, param):
 
 
 def get_cDi_lamwake(U, param):
-	# laminar wake dissipation function cDi
-	# INPUT
-	#   U     : state vector [th; ds; sa; ue]
-	#   param : parameter structure
-	# OUTPUT
-	#   cDi, cDi_U : dissipation function and its linearization w.r.t. U (1x4)
-	# DETAILS
-	#   This is one contribution to the dissipation function cDi = 2*cD/H*
+	"""
+	laminar wake dissipation function cDi
+	INPUT
+	  U     : state vector [th; ds; sa; ue]
+	  param : parameter structure
+	OUTPUT
+	  cDi, cDi_U : dissipation function and its linearization w.r.t. U (1x4)
+	DETAILS
+	  This is one contribution to the dissipation function cDi = 2*cD/H*
+	"""
 
 	tb = param.turb
 
@@ -313,14 +316,16 @@ def get_cDi_lamwake(U, param):
 
 
 def get_cDi_outer(U, param):
-	# turbulent outer layer contribution to dissipation function cDi
-	# INPUT
-	#   U     : state vector [th; ds; sa; ue]
-	#   param : parameter structure
-	# OUTPUT
-	#   cDi, cDi_U : dissipation function and its linearization w.r.t. U (1x4)
-	# DETAILS
-	#   This is one contribution to the dissipation function cDi = 2*cD/H*
+	"""
+	turbulent outer layer contribution to dissipation function cDi
+	INPUT
+	  U     : state vector [th; ds; sa; ue]
+	  param : parameter structure
+	OUTPUT
+	  cDi, cDi_U : dissipation function and its linearization w.r.t. U (1x4)
+	DETAILS
+	  This is one contribution to the dissipation function cDi = 2*cD/H*
+	"""
 
 	if (not param.turb):
 		cDi = 0
@@ -342,15 +347,18 @@ def get_cDi_outer(U, param):
 
 
 def get_cDi_lamstress(U, param):
-	# laminar stress contribution to dissipation function cDi
-	# INPUT
-	#   U     : state vector [th; ds; sa; ue]
-	#   param : parameter structure
-	# OUTPUT
-	#   cDi, cDi_U : dissipation function and its linearization w.r.t. U (1x4)
-	# DETAILS
-	#   This is one contribution to the dissipation function cDi = 2*cD/H*
 
+	"""
+	laminar stress contribution to dissipation function cDi
+	INPUT
+	  U     : state vector [th; ds; sa; ue]
+	  param : parameter structure
+	OUTPUT
+	  cDi, cDi_U : dissipation function and its linearization w.r.t. U (1x4)
+	DETAILS
+	  This is one contribution to the dissipation function cDi = 2*cD/H*
+	"""
+	  
 	# first get Hs, Us, and Ret
 	Hs, Hs_U = get_Hs(U, param)
 	Us, Us_U = get_Us(U, param)
@@ -367,16 +375,18 @@ def get_cDi_lamstress(U, param):
 
 
 def get_uq(ds, ds_U, cf, cf_U, Hk, Hk_U, Ret, Ret_U, param):
-	# calculates the equilibrium 1/ue*due/dx
-	# INPUT
-	#   ds, ds_U   : delta star and linearization (1x4)
-	#   cf, cf_U   : skin friction and linearization (1x4)
-	#   Hk, Hk_U   : kinematic shape parameter and linearization (1x4)
-	#   Ret, Ret_U : theta Reynolds number and linearization (1x4)
-	#   param      : parameter structure
-	# OUTPUT
-	#   uq, uq_U   : equilibrium 1/ue*due/dx and linearization w.r.t. state (1x4)
-
+	"""
+	calculates the equilibrium 1/ue*due/dx
+	INPUT
+	  ds, ds_U   : delta star and linearization (1x4)
+	  cf, cf_U   : skin friction and linearization (1x4)
+	  Hk, Hk_U   : kinematic shape parameter and linearization (1x4)
+	  Ret, Ret_U : theta Reynolds number and linearization (1x4)
+	  param      : parameter structure
+	OUTPUT
+	  uq, uq_U   : equilibrium 1/ue*due/dx and linearization w.r.t. state (1x4)
+	"""
+	  
 	beta = param.GB
 	A = param.GA
 	C = param.GC
@@ -460,16 +470,18 @@ def get_cteq(U, param):
 
 
 def get_upw(U1, U2, param):
-	# calculates a local upwind factor (0.5 = trap; 1 = BE) based on two states
-	# INPUT
-	#   U1,U2 : first/upwind and second/downwind states (4x1 each)
-	#   param : parameter structure
-	# OUTPUT
-	#   upw   : scalar upwind factor
-	#   upw_U : 1x8 linearization vector, [upw_U1, upw_U2]
-	# DETAILS
-	#   Used to ensure a stable viscous discretization
-	#   Decision to upwind is made based on the shape factor change
+	"""
+	calculates a local upwind factor (0.5 = trap; 1 = BE) based on two states
+	INPUT
+	  U1,U2 : first/upwind and second/downwind states (4x1 each)
+	  param : parameter structure
+	OUTPUT
+	  upw   : scalar upwind factor
+	  upw_U : 1x8 linearization vector, [upw_U1, upw_U2]
+	DETAILS
+	  Used to ensure a stable viscous discretization
+	  Decision to upwind is made based on the shape factor change
+	"""
 
 	Hk1, Hk1_U1 = get_Hk(U1, param)
 	Hk2, Hk2_U2 = get_Hk(U2, param)
@@ -494,14 +506,16 @@ def get_upw(U1, U2, param):
 
 
 def upwind(upw, upw_U, f1, f1_U1, f2, f2_U2):
-	# calculates an upwind average (and derivatives) of two scalars
-	# INPUT
-	#   upw, upw_U : upwind scalar and its linearization w.r.t. U1,U2
-	#   f1, f1_U   : first scalar and its linearization w.r.t. U1
-	#   f2, f2_U   : second scalar and its linearization w.r.t. U2
-	# OUTPUT
-	#   f    : averaged scalar
-	#   f_U  : linearization of f w.r.t. both states, [f_U1, f_U2]
+	"""
+	calculates an upwind average (and derivatives) of two scalars
+	INPUT
+	  upw, upw_U : upwind scalar and its linearization w.r.t. U1,U2
+	  f1, f1_U   : first scalar and its linearization w.r.t. U1
+	  f2, f2_U   : second scalar and its linearization w.r.t. U2
+	OUTPUT
+	  f    : averaged scalar
+	  f_U  : linearization of f w.r.t. both states, [f_U1, f_U2]
+	"""
 
 	f = (1 - upw) * f1 + upw * f2
 	f_U = (-upw_U) * f1 + upw_U * f2 + \

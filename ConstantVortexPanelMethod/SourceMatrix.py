@@ -13,12 +13,12 @@ def SourceMatrix(Foil):
 
 	"""
 	N = Foil.N
-	paneles = Foil.geom.paneles
+	panels = Foil.geom.panels
 	
 	SourceM = np.empty((N,N),dtype=float)
 	np.fill_diagonal(SourceM, 0.5)
-	for i, panel_i in enumerate(paneles):
-		for j, panel_j in enumerate(paneles):
+	for i, panel_i in enumerate(panels):
+		for j, panel_j in enumerate(panels):
 			if j != i:
 				SourceM[i, j] = 0.5/np.pi*integrate.quad(lambda s: ((panel_i.midx-(panel_j.xmin-s*np.sin(panel_j.beta)))*(np.cos(panel_i.beta))
 											+ (panel_i.midy-(panel_j.ymin+s*np.cos(panel_j.beta)))*(np.sin(panel_i.beta))) /

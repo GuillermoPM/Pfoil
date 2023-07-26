@@ -158,20 +158,20 @@ def SplineLen(spline, xlimit):
 		
 	return s
 
-def pannel_division(coord, N, foil_name, presc):
+def panel_division(coord, N, foil_name, presc):
 	"""
-	Discretizes the geometry in the number of pannels indicated
+	Discretizes the geometry in the number of panels indicated
 
 	Input:
 	-------
 	coord : foil coordinate array (2 x N)
-	N : number of pannels
+	N : number of panels
 	foil_name: foil name
 
 	Output:
 	------
-	pannels : array of pannels
-	coords : array of nodes that define the pannels
+	panels : array of panels
+	coords : array of nodes that define the panels
 
 	"""
 	
@@ -202,14 +202,14 @@ def pannel_division(coord, N, foil_name, presc):
 		yp.append(item)
 
 	# pannel generation
-	pannels = np.empty(N+1, dtype=object)
+	panels = np.empty(N+1, dtype=object)
 	coords = np.array(list(zip(xp,yp)))
 	for i in range(N):
-		pannels[i] = Pannel(coords[i],coords[i+1], i+1)
+		panels[i] = Pannel(coords[i],coords[i+1], i+1)
 
-	pannels[-1] = Pannel(coords[-1], coords[0], 999)
+	panels[-1] = Pannel(coords[-1], coords[0], 999)
 
-	return pannels, coords
+	return panels, coords
 
 
 def coord_adjustment(coord):
@@ -353,8 +353,8 @@ def Sval(Foil):
 	# Variable definitions
 	geom_sup = Foil.geom.spline_sup 		# lower spline
 	geom_inf = Foil.geom.spline_inf 		# upper spline
-	panneles = Foil.geom.panneles 			# pannels
-	wakepannels = Foil.geom.wakepannels 		# wake pannels
+	panneles = Foil.geom.panneles 			# panels
+	wakepanels = Foil.geom.wakepanels 		# wake panels
 	xPoints = Foil.geom.coord[:, 0] 		# x coordinates of the different nodes
 
 	s_totSup = SplineLen(geom_sup, 1) 		# upper geometry total length
@@ -381,7 +381,7 @@ def Sval(Foil):
 	x_sup = np.concatenate((x_sup1, x_sup2))
 	x_inf = np.array(
 		[pannel.midx for pannel in panneles if pannel.ident >= Foil.isol.stgpannel])
-	x_wake = np.array([pannel.midx for pannel in wakepannels])
+	x_wake = np.array([pannel.midx for pannel in wakepanels])
 
 	Foil.isol.chorddist = np.array([x_sup, x_inf, x_wake],dtype = object)
 
@@ -402,7 +402,7 @@ def trailing_specs(Foil):
 		tdp : t · p, gives the trailing edge vortex intensity
 
 	"""
-	panneles = Foil.geom.panneles			# airfoil pannels
+	panneles = Foil.geom.panneles			# airfoil panels
 	t1 = -1*panneles[0].t 				#  first pannel direction vector (lower trailing edge)
 	t2 = 1*panneles[-2].t  				# last pannel direction vector (upper trailing edge)
 	t = 0.5*(t1+t2)
@@ -416,20 +416,20 @@ def trailing_specs(Foil):
 	return t, hTE, dtdx, tcp, tdp
 
 
-def pannel_division_CVPM(coord, N, foil_name):
+def panel_division_CVPM(coord, N, foil_name):
 	"""
 	Divides the airfoil in the especified pannel number for CVPM.
 
 	Input:
 	-------
 	coord : foil coordinate array (2 x N)
-	N : number of pannels
+	N : number of panels
 	foil_name: foil name
 
 	Output:
 	------
-	pannels : array of pannels
-	coords : array of nodes that define the pannels
+	panels : array of panels
+	coords : array of nodes that define the panels
 
 	"""
 	
@@ -484,10 +484,10 @@ def pannel_division_CVPM(coord, N, foil_name):
 		yp.append(item)
 
 	# Panneling
-	pannels = np.empty(N, dtype=object)
+	panels = np.empty(N, dtype=object)
 	coords = np.array(list(zip(xp, yp)))
 	for i in range(N):
-		pannels[i] = Pannel(coords[i], coords[i+1], i+1)
+		panels[i] = Pannel(coords[i], coords[i+1], i+1)
 
 
-	return pannels, coords
+	return panels, coords
