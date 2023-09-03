@@ -237,7 +237,7 @@ def panel_constsource_velocity2(Xj, xi, vdir=None):
 	xj2, zj2 = Xj[:, 1]
 
 	# panel-aligned tangent and normal vectors
-	t = np.array([xj2 - xj1, zj2 - zj1]) / np.linalg.norm([xj2 - xj1, zj2 - zj1])
+	t = np.array([xj2 - xj1, zj2 - zj1]) / np.linalg.norm([xj2 - xj1, zj2 - zj1]) #type: ignore
 	n = np.array([-t[1], t[0]])
 
 	# control point relative to (xj1, zj1)
@@ -279,13 +279,27 @@ def panel_constsource_velocity2(Xj, xi, vdir=None):
 
 
 def panel_linsource_velocity(Xj, xi, vdir=None):
+	"""
+		Lineal source effect over the velocity at a certain panel point
+
+		INPUT:
+        xi : calculation point
+        panel : panel studied
+        midpt : flag that check if the point is at the middle of the panel
+        vdir : velocity vector direction (if specified)
+
+		OUTPUT:
+		coef1, coef2 : weighted coefficients for calculation
+
+    """
+	
 	# panel coordinates
 	xj1, zj1 = Xj[:, 0]
 	xj2, zj2 = Xj[:, 1]
 
 	# panel-aligned tangent and normal vectors
 	t = np.array([xj2-xj1, zj2-zj1])
-	t /= np.linalg.norm(t)
+	t /= np.linalg.norm(t) # type: ignore
 	n = np.array([-t[1], t[0]])
 
 	# control point relative to (xj1,zj1)

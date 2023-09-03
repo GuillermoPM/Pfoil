@@ -5,6 +5,9 @@ from scipy.sparse.linalg import spsolve
 
 
 def solve_glob(M):
+	"""
+	Solves the global system
+	"""
 	
 	Nsys = M.glob.Nsys  # number of dofs
 	docl = M.oper.givencl  # 1 if in cl-constrained mode
@@ -21,8 +24,6 @@ def solve_glob(M):
 	# inviscid edge velocity on the airfoil and wake
 	ueinv = get_ueinv(M)
 
-	# initialize the global variable Jacobian (TODO: estimate nnz)
-	# +1 for cl-alpha constraint
 	R_V = sp.sparse.lil_matrix((4 * Nsys + docl, 4 * Nsys + docl))
 
 	# state indices in the global system
@@ -59,11 +60,14 @@ def solve_glob(M):
 
 def jacobian_add_Rx(M):
 	"""
-	include effects of R_x into R_U: R_ue += R_x*x_st*st_ue
+	Include effects of R_x into R_U: R_ue += R_x*x_st*st_ue
+
 	INPUT
 	  M  : mfoil class with residual Jacobian calculated
+	  
 	OUTPUT
 	  M.glob.R_U : ue linearization updated with R_x
+
 	DETAILS
 	  The global residual Jacobian has a column for ue sensitivity
 	  ue, the edge velocity, also affects the location of the stagnation point
