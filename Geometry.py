@@ -343,11 +343,17 @@ def Sval(Foil):
 	"""
 		Spline length from the lower surface trailing edge to each node.
 
-		Input:
-		-------------
-		Foil : perfil
+		Input
+		-------
 
-		OUTPUT \n
+		Foil : airfoil
+
+		Output
+		-------
+
+		Foil.geom.s : spline that defines the full geometry.
+		Foil.isol.xi : distance from any point in the foil to the stagnation point.
+		Foil.isol.chorddist : distance in chord percentaje to the stagnation point.
 
 	"""
 	# Variable definitions

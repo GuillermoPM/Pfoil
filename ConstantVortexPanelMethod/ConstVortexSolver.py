@@ -81,7 +81,7 @@ def CVPM_solver(Foil):
 
 def cl_calc(Foil):
 	"""
-		Returns the Cl given the angle of attack and Cp distribution
+		Returns the lift coefficient given the angle of attack and Cp distribution
 	
 	"""
 

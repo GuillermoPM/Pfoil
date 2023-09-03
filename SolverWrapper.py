@@ -82,10 +82,8 @@ def PfoilExe(Foil, GUIParameters):
 	foil.oper.Re = GUIParameters.Re         # Reynolds number
 	foil.oper.Ma = GUIParameters.Mach		# Mach
 
-	paneles = foil.geom.paneles				# número de paneles general
-
-	Sval(foil)								# spline length calculation
-	build_term(foil)
+	Sval(foil)								# spline length
+	build_term(foil)						# thermodynamics
 	if GUIParameters.model == 0:
 		CVPM_solver(foil)
 	elif GUIParameters.model == 1:

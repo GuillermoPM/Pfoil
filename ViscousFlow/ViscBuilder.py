@@ -145,7 +145,7 @@ def wake_init(Foil, ue):
 
 def wake_sys(Foil, param):
 	"""
-	constructs residual system corresponding to wake initialization
+	Builds residual system corresponding to wake initialization
 	INPUT
 	  param  : parameters
 	OUTPUT

@@ -117,14 +117,14 @@ def get_cdutstag(U, param):
 	"""
 	Calculates cDi*ue*theta, used in stagnation station calculations
 	
-	INPUT:
+	INPUT----
 		U : state vector [th; ds; sa; ue]
 		param : parameter structure
 		
-	OUTPUT:
+	OUTPUT----
 		D, D_U : value and linearization of cDi*ue*theta
 	
-	DETAILS:
+	DETAILS----
 		Only for stagnation and laminar
 	"""
 	U[3] = 0
@@ -149,17 +149,17 @@ def get_cDixt(U, x, param):
 	"""
 	Calculates cDi*x/theta from the state
 	
-	INPUT:
+	INPUT----
 		U : state vector [th; ds; sa; ue]
 		x : distance along wall (xi)
 		param : parameter structure
 		
-	OUTPUT:
+	OUTPUT----
 		cDixt   : the combination cDi*x/theta (calls cDi function)
 		cDixt_U : linearization w.r.t. U (1x4)
 		cDixt_x : linearization w.r.t x (scalar)
 		
-	DETAILS:
+	DETAILS----
 		cDi is the dissipation function
 	"""
 	cDi, cDi_U = get_cDi(U, param)
@@ -175,14 +175,14 @@ def get_cDi(U, param):
 	"""
 	calculates cDi = dissipation function = 2*cD/H*, from the state
 	
-	INPUT
+	INPUT----
 	  U     : state vector [th; ds; sa; ue]
 	  param : parameter structure
 	
-	OUTPUT
+	OUTPUT----
 	  cDi, cDi_U : dissipation function and its linearization w.r.t. U (1x4)
 	
-	DETAILS
+	DETAILS----
 	  cD is the dissipation coefficient, int(tau*du/dn*dn)/(rho*ue^3)
 	  The combination with H* appears in the shape parameter equation
 	"""
@@ -284,12 +284,15 @@ def get_cDi_lam(U, param):
 
 def get_cDi_lamwake(U, param):
 	"""
-	laminar wake dissipation function cDi
+	Laminar wake dissipation function cDi
+
 	INPUT
 	  U     : state vector [th; ds; sa; ue]
 	  param : parameter structure
+
 	OUTPUT
 	  cDi, cDi_U : dissipation function and its linearization w.r.t. U (1x4)
+
 	DETAILS
 	  This is one contribution to the dissipation function cDi = 2*cD/H*
 	"""
@@ -317,12 +320,15 @@ def get_cDi_lamwake(U, param):
 
 def get_cDi_outer(U, param):
 	"""
-	turbulent outer layer contribution to dissipation function cDi
+	Turbulent outer layer contribution to dissipation function cDi
+
 	INPUT
 	  U     : state vector [th; ds; sa; ue]
 	  param : parameter structure
+
 	OUTPUT
 	  cDi, cDi_U : dissipation function and its linearization w.r.t. U (1x4)
+	  
 	DETAILS
 	  This is one contribution to the dissipation function cDi = 2*cD/H*
 	"""
@@ -349,12 +355,15 @@ def get_cDi_outer(U, param):
 def get_cDi_lamstress(U, param):
 
 	"""
-	laminar stress contribution to dissipation function cDi
+	Laminar stress contribution to dissipation function cDi
+
 	INPUT
 	  U     : state vector [th; ds; sa; ue]
 	  param : parameter structure
+
 	OUTPUT
 	  cDi, cDi_U : dissipation function and its linearization w.r.t. U (1x4)
+
 	DETAILS
 	  This is one contribution to the dissipation function cDi = 2*cD/H*
 	"""
@@ -376,13 +385,15 @@ def get_cDi_lamstress(U, param):
 
 def get_uq(ds, ds_U, cf, cf_U, Hk, Hk_U, Ret, Ret_U, param):
 	"""
-	calculates the equilibrium 1/ue*due/dx
+	Calculates the equilibrium 1/ue*due/dx
+
 	INPUT
 	  ds, ds_U   : delta star and linearization (1x4)
 	  cf, cf_U   : skin friction and linearization (1x4)
 	  Hk, Hk_U   : kinematic shape parameter and linearization (1x4)
 	  Ret, Ret_U : theta Reynolds number and linearization (1x4)
 	  param      : parameter structure
+
 	OUTPUT
 	  uq, uq_U   : equilibrium 1/ue*due/dx and linearization w.r.t. state (1x4)
 	"""
@@ -422,12 +433,15 @@ def get_uq(ds, ds_U, cf, cf_U, Hk, Hk_U, Ret, Ret_U, param):
 
 def get_cteq(U, param):
 	"""
-	calculates root of the equilibrium shear stress coefficient: sqrt(ctau_eq)
+	Calculates root of the equilibrium shear stress coefficient: sqrt(ctau_eq)
+
 	INPUT
 	  U     : state vector [th; ds; sa; ue]
 	  param : parameter structure
+
 	OUTPUT
 	  cteq, cteq_U : sqrt(equilibrium shear stress) and its lin w.r.t. U (1x4)
+
 	DETAILS
 	  uses equilibrium shear stress correlations
 	"""
@@ -471,13 +485,16 @@ def get_cteq(U, param):
 
 def get_upw(U1, U2, param):
 	"""
-	calculates a local upwind factor (0.5 = trap; 1 = BE) based on two states
+	Calculates a local upwind factor (0.5 = trap; 1 = BE) based on two states
+
 	INPUT
 	  U1,U2 : first/upwind and second/downwind states (4x1 each)
 	  param : parameter structure
+
 	OUTPUT
 	  upw   : scalar upwind factor
 	  upw_U : 1x8 linearization vector, [upw_U1, upw_U2]
+
 	DETAILS
 	  Used to ensure a stable viscous discretization
 	  Decision to upwind is made based on the shape factor change
@@ -507,11 +524,13 @@ def get_upw(U1, U2, param):
 
 def upwind(upw, upw_U, f1, f1_U1, f2, f2_U2):
 	"""
-	calculates an upwind average (and derivatives) of two scalars
+	Calculates an upwind average (and derivatives) of two scalars
+
 	INPUT
 	  upw, upw_U : upwind scalar and its linearization w.r.t. U1,U2
 	  f1, f1_U   : first scalar and its linearization w.r.t. U1
 	  f2, f2_U   : second scalar and its linearization w.r.t. U2
+
 	OUTPUT
 	  f    : averaged scalar
 	  f_U  : linearization of f w.r.t. both states, [f_U1, f_U2]
@@ -525,12 +544,17 @@ def upwind(upw, upw_U, f1, f1_U1, f2, f2_U2):
 
 
 def get_Us(U, param):
-	# calculates the normalized wall slip velocity Us
-	# INPUT
-	#   U     : state vector [th; ds; sa; ue]
-	#   param : parameter structure
-	# OUTPUT
-	#   Us, Us_U : normalized wall slip velocity and its linearization w.r.t. U (1x4)
+	"""
+	Calculates the normalized wall slip velocity Us
+
+	INPUT
+	  U     : state vector [th; ds; sa; ue]
+	  param : parameter structure
+
+	OUTPUT
+	  Us, Us_U : normalized wall slip velocity and its linearization w.r.t. U (1x4)
+	
+	"""
 
 	Hs, Hs_U = get_Hs(U, param)
 	Hk, Hk_U = get_Hk(U, param)
@@ -561,14 +585,19 @@ def get_Us(U, param):
 
 
 def get_Hs(U, param):
-	# calculates Hs = Hstar = K.E. shape parameter, from U
-	# INPUT
-	#   U     : state vector [th; ds; sa; ue]
-	#   param : parameter structure
-	# OUTPUT
-	#   Hs, Hs_U : Hstar and its lin w.r.t. U (1x4)
-	# DETAILS
-	#   Hstar is the ratio theta*/theta, where theta* is the KE thickness
+	"""
+	Calculates Hs = Hstar = K.E. shape parameter, from U
+
+	INPUT
+	  U     : state vector [th; ds; sa; ue]
+	  param : parameter structure
+
+	OUTPUT
+	  Hs, Hs_U : Hstar and its lin w.r.t. U (1x4)
+	DETAILS
+
+	  Hstar is the ratio theta*/theta, where theta* is the KE thickness
+	"""
 
 	Hk, Hk_U = get_Hk(U, param)
 
