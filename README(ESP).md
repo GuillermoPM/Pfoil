@@ -1,3 +1,5 @@
+# Pfoil
+
 El presente programa se ha realizado como Trabajo Fin de Grado de Guillermo Peña Martínez, alumno de la Escuela de Ingenierías de la Universidad de León (ULE), para el Grado en Ingeniería Aeroespacial.
 
 La información y ecuaciones de los distintos métodos de los paneles empleados se ha obtenido del libro Fundamentals of Aerodynamics (Anderson) y de la documentación del programa XFOIL.

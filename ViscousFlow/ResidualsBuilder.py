@@ -12,10 +12,12 @@ def residual_transition(M, param, x, U, Aux):
 	  x     : 2x1 vector, [x1, x2], containing xi values at the points
 	  U     : 4x2 matrix, [U1, U2], containing the states at the points
 	  Aux   : ()x2 matrix, [Aux1, Aux2] of auxiliary data at the points
+
 	OUTPUT
 	  R     : 3x1 transition residual vector
 	  R_U   : 3x8 residual Jacobian, [R_U1, R_U2]
 	  R_x   : 3x2 residual linearization w.r.t. x, [R_x1, R_x2]
+	  
 	DETAILS
 	  The state U1 should be laminar; U2 should be turbulent
 	  Calculates and linearizes the transition location in the process
@@ -138,7 +140,7 @@ def residual_transition(M, param, x, U, Aux):
 	Rt_U2 = Rt_U[:, I2]
 
 	# combined residual and linearization
-	R = Rl + Rt
+	R = Rl + Rt # type: ignore
 	if any(R.imag):
 		raise ValueError('imaginary transition residual')
 
@@ -303,6 +305,7 @@ def residual_station(param, x, U, Aux):
                     (uq * dx - uelog) * param.Cuq + 2 * \
                     de * (uq_U * dx - uelog_U) * param.Cuq
 		Rlag_x = Clag * (cteq - ald * saa) * dx_x + 2 * de * uq * dx_x
+
 	else:
 		# laminar, amplification factor equation
 		if param.simi:
@@ -335,8 +338,8 @@ def residual_station(param, x, U, Aux):
 
 	Rmom = thlog + (2+H+Hw-Ms)*uelog - 0.5*xlog*cfxt
 	Rmom_U = thlog_U + (H_U+Hw_U-Ms_U)*uelog + (2+H+Hw-Ms) * \
-            uelog_U - 0.5*xlog*cfxt_U
-	Rmom_x = -0.5*xlog_x*cfxt - 0.5*xlog*cfxt_x
+            uelog_U - 0.5*xlog*cfxt_U # type: ignore
+	Rmom_x = -0.5*xlog_x*cfxt - 0.5*xlog*cfxt_x # type: ignore
 
 	cDixt1, cDixt1_U1, cDixt1_x1 = get_cDixt(U1, x[0], param)
 	cDixt2, cDixt2_U2, cDixt2_x2 = get_cDixt(U2, x[1], param)
@@ -353,7 +356,7 @@ def residual_station(param, x, U, Aux):
 	Rshape = Hslog + (2*Hss/Hs + 1-H-Hw)*uelog + xlog*(0.5*cfxtu - cDixt)
 	Rshape_U = Hslog_U + (2*Hss_U/Hs - 2*Hss/(Hs**2)*Hs_U - H_U - Hw_U) * \
             uelog + (2*Hss/Hs + 1-H-Hw)*uelog_U + xlog*(0.5*cfxtu_U - cDixt_U)
-	Rshape_x = xlog_x*(0.5*cfxtu - cDixt) + xlog*(0.5*cfxtu_x - cDixt_x)
+	Rshape_x = xlog_x*(0.5*cfxtu - cDixt) + xlog*(0.5*cfxtu_x - cDixt_x) # type: ignore
 
 	# put everything together
 	R = np.array([Rmom, Rshape, Rlag])

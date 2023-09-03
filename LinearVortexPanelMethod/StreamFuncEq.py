@@ -6,12 +6,14 @@ import numpy as np
 
 def panel_linvortex_stream(panel_i, panel_j):
 	"""
-		
+		Linear vortex distribution effect over the streamline at a control point.
 
+		INPUT:
+		panel_i : panel where the effect is calculated
+		panel_j : panel whose effect is calculated
 
-        Efecto en la línea de corriente sobre el punto de cálculo de un panel con una distribución lineal de un vórtice.\n
-        xi : punto de cálculo
-        panel : panel de cálculo
+		OUTPUT:
+		coef1, coef2 : weighted coefficients for the calculation
     """
 
 	d = np.array([panel_i.xmin - panel_j.xmin, panel_i.ymin - panel_j.ymin])
@@ -45,11 +47,17 @@ def panel_linvortex_stream(panel_i, panel_j):
 
 def panel_linvortex_velocity(xi, panel, midpt, vdir=None):
 	"""
-        Efecto sobre la velocidad tangencial en un punto de un panel con un vórtice lineal.\n
-        xi : punto de cálculo
-        panel : panel de estudio
-        midpt : indicador de si se encuentra en el punto medio del panel
-        vdir : dirección del vector velocidad (si se especifica)
+		Lineal vortex effect over the velocity at a certain panel point
+
+		INPUT:
+        xi : calculation point
+        panel : panel studied
+        midpt : flag that check if the point is at the middle of the panel
+        vdir : velocity vector direction (if specified)
+
+		OUTPUT:
+		coef1, coef2 : weighted coefficients for calculation
+
     """
     
 	d = np.array([xi[0] - panel.xmin, xi[1] - panel.ymin])
@@ -84,9 +92,14 @@ def panel_linvortex_velocity(xi, panel, midpt, vdir=None):
 
 def panel_constsource_stream(panel_i, panel_j):
 	"""
-        Efecto de un panel con un source constante sobre la línea de corriente que pasa por un punto.\n
-        xi : punto de análisis
-        panel : panel de estudio
+		Constant source effect over the streamline at a point.
+
+		INPUT:
+		panel_i : panel where the effect is calculated
+		panel_j : panel whose effect is calculated
+
+		OUTPUT:
+		coef1, coef2 : weighted coefficients for the calculation
     """
 
 	xz = np.array([panel_i.xmin-panel_j.xmin, panel_i.ymin-panel_j.ymin])
@@ -121,6 +134,19 @@ def panel_constsource_stream(panel_i, panel_j):
 	return P
 
 def panel_constsource_velocity(xi, panel, vdir=None):
+	"""
+		Lineal vortex effect over the velocity at a certain panel point
+
+		INPUT:
+        xi : calculation point
+        panel : panel studied
+        midpt : flag that check if the point is at the middle of the panel
+        vdir : velocity vector direction (if specified)
+
+		OUTPUT:
+		coef1, coef2 : weighted coefficients for calculation
+
+    """
 
 	xz = xi - np.array([panel.xmin, panel.ymin])
 	x = np.dot(xz, panel.t)
@@ -155,18 +181,15 @@ def panel_constsource_velocity(xi, panel, vdir=None):
 
 def panel_linsource_stream(panel_j, panel_i):
 	"""
-	calculates the streamfunction coefficients for a linear source panel
+		Linear source distribution effect over the streamline at a control point.
 
-	INPUTS:
-		Xj  : X[:,[1,2]] = panel endpoint coordinates
-		xi  : control point coordinates (2x1)
-	OUTPUTS:
-		a,b : streamfunction influence coefficients
+		INPUT:
+		panel_i : panel where the effect is calculated
+		panel_j : panel whose effect is calculated
 
-	DETAILS:
-		The streamfunction due to the panel is then a*s1 + b*s2
-		where s1 and s2 are the source strengths at the panel endpoints
-	"""
+		OUTPUT:
+		coef1, coef2 : weighted coefficients for the calculation
+    """
 	xz = np.array([panel_i.xmin-panel_j.xmin, panel_i.ymin-panel_j.ymin])
 	x = np.dot(xz, panel_j.t)
 	z = np.dot(xz, panel_j.n)

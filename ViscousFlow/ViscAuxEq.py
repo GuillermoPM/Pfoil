@@ -594,8 +594,8 @@ def get_Hs(U, param):
 
 	OUTPUT
 	  Hs, Hs_U : Hstar and its lin w.r.t. U (1x4)
-	DETAILS
 
+	DETAILS
 	  Hstar is the ratio theta*/theta, where theta* is the KE thickness
 	"""
 
@@ -666,14 +666,19 @@ def get_Hs(U, param):
 
 
 def get_damp(U, param):
-	# calculates the amplification rate, dn/dx, used in predicting transition
-	# INPUT
-	#   U     : state vector [th; ds; sa; ue]
-	#   param : parameter structure
-	# OUTPUT
-	#   damp, damp_U : amplification rate and its linearization w.r.t. U (1x4)
-	# DETAILS
-	#   damp = dn/dx is used in the amplification equation, prior to transition
+	"""
+	Calculates the amplification rate, dn/dx, used in predicting transition
+	
+	INPUT
+	  U     : state vector [th; ds; sa; ue]
+	  param : parameter structure
+	
+	OUTPUT
+	  damp, damp_U : amplification rate and its linearization w.r.t. U (1x4)
+	
+	DETAILS
+	  damp = dn/dx is used in the amplification equation, prior to transition
+	"""
 
 	Hk, Hk_U = get_Hk(U, param)
 	Ret, Ret_U = get_Ret(U, param)

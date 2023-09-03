@@ -19,8 +19,9 @@ import matplotlib.pyplot as plt
 
 class Pannel():
 	"""
-	## Pannel
 	A pannel is deffined from it's extreme points and the angle between the normal and the horizontal.
+
+	>>> Panel(coordmin, coordmax, identnumber)
 
 	### Args:
 
@@ -30,12 +31,12 @@ class Pannel():
 	
 	### Params:
 
-	beta -> Angle between the normal and the horizontal \n
-	lug -> Flag for the position (upper or lower) \n
-	intens -> pannel intensity \n
-	cpi -> Pressure coefficient induced by the pannel \n
-	Vt -> Tangential velocity \n
-	(midx, midy) -> Midpoint \n
+	beta : Angle between the normal and the horizontal \n
+	lug : Flag for the position (upper or lower) \n
+	intens : pannel intensity \n
+	cpi : Pressure coefficient induced by the pannel \n
+	Vt : Tangential velocity \n
+	(midx, midy) : Midpoint \n
 
 
 	"""
@@ -60,7 +61,7 @@ class Pannel():
 		self.midpt = np.array([self.midx, self.midy])  # pannel midpoint
 
 		self.t = np.array([self.xmax - self.xmin,self.ymax - self.ymin])	# tangential vector
-		self.t = self.t/np.linalg.norm(self.t)								# tangential vector normalized
+		self.t = self.t/np.linalg.norm(self.t)								# type: ignore # tangential vector normalized
 		self.n = np.array([-self.t[1], self.t[0]])							# normal vector
 
 		self.leftcoord = coordmin			# min point coordinates
@@ -91,7 +92,7 @@ class Pannel():
 
 class Wakepanel(Pannel):
 	"""
-		A wake pannel is a pannel whose location attribute is the wake
+		A wake pannel is a pannel located at the wake
 	"""
 
 	def __init__(self, coordmin, coordmax, i):
@@ -113,13 +114,11 @@ def SplineGeom(coord, foil_name):
 	Gives the splines that interpolate the foil coordinates. The foil is divided in upper and lower and the splines are stored in
 	variables and are introduced in the pannel division function
 
-	Input:
-	-------------
+	INPUT:
 	coord : foil coordinate array (2 x N)
 	foil_name : foil name
 
-	Output:
-	------------
+	OUTPUT:
 	spline_sup, spline_inf : geometry interpolating splines
 	"""
 	xsup, ysup, xinf, yinf = coord_adjustment(coord)
@@ -138,13 +137,11 @@ def SplineLen(spline, xlimit):
 	"""
 	Calculates the spline length up to the specified point
 	
-	Input
-	-------
+	INPUT:
 	spline : geometry interpolating spline
 	xlimit : limit point
 
-	Output
-	-------
+	OUPUT:
 	s : spline lenght
 
 	"""
@@ -162,14 +159,12 @@ def panel_division(coord, N, foil_name, presc):
 	"""
 	Discretizes the geometry in the number of panels indicated
 
-	Input:
-	-------
+	INPUT:
 	coord : foil coordinate array (2 x N)
 	N : number of panels
 	foil_name: foil name
 
-	Output:
-	------
+	OUTPUT:
 	panels : array of panels
 	coords : array of nodes that define the panels
 
@@ -179,7 +174,7 @@ def panel_division(coord, N, foil_name, presc):
 
 
 	# x coordinate generation
-	if N%2 ==0:
+	if N%2 == 0:
 		xpa = 0.5 - 0.5*np.cos(np.linspace(np.pi, 0, int(N/2)+2))
 		xpb = 0.5 - 0.5*np.cos(np.linspace(0, np.pi,  int(N/2)+1))
 		xpb = xpb[1:]
@@ -214,8 +209,7 @@ def panel_division(coord, N, foil_name, presc):
 
 def coord_adjustment(coord):
 	"""
-		Adjusts the coordinates to fit the correct order
-	
+		Adjusts the coordinates to fit the correct order.
 	"""
 	x, y = coord[:, 0], coord[:, 1]
 	if len(x) %2 ==0:
@@ -254,7 +248,6 @@ def coord_adjustment(coord):
 def NacaFoil(foil_name,model):
 	"""
 		NACA foil generator using AirfoilTools function for 4 digit airfoils
-	
 	"""
 
 	m = int(foil_name[0])/100
@@ -326,13 +319,11 @@ def xPond(refpoint, calcpoints):
 	"""
 	Returns the distance in x between the reference point and the target
 	
-	Input:
-	-------------
+	INPUT:
 	refpoint : distancia de referencia x
 	calcpoints : array de distancias de cálculo
 
-	Output
-	-------------
+	OUTPUT:
 	dist : array distancias valor absoluto
 	"""
 
@@ -343,14 +334,10 @@ def Sval(Foil):
 	"""
 		Spline length from the lower surface trailing edge to each node.
 
-		Input
-		-------
-
+		INPUT:
 		Foil : airfoil
 
-		Output
-		-------
-
+		OUTPUT:
 		Foil.geom.s : spline that defines the full geometry.
 		Foil.isol.xi : distance from any point in the foil to the stagnation point.
 		Foil.isol.chorddist : distance in chord percentaje to the stagnation point.
@@ -395,15 +382,13 @@ def trailing_specs(Foil):
 	"""
 		Gives the trailing edge specs
 
-		Input
-		-------------
+		INPUT:
 		Foil : solving airfoil
 
-		Output
-		-------------
+		OUTPUT:
 		t : bisector of the trailing edge
 		hTE : trailing edge gap
-		dtdx : 
+		dtdx : trailing edge slope
 		tcp : t x p, gives the trailing edge source intensity
 		tdp : t · p, gives the trailing edge vortex intensity
 
@@ -426,14 +411,12 @@ def panel_division_CVPM(coord, N, foil_name):
 	"""
 	Divides the airfoil in the especified pannel number for CVPM.
 
-	Input:
-	-------
+	INPUT:
 	coord : foil coordinate array (2 x N)
 	N : number of panels
 	foil_name: foil name
 
-	Output:
-	------
+	OUTPUT:
 	panels : array of panels
 	coords : array of nodes that define the panels
 

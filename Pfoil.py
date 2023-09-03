@@ -196,18 +196,18 @@ class Foil():
 		self.geom.foil_name = foil
 		self.geom.coord = coord
 
-
-
 	def FoilInit(self):
 		self.FoilSpline()
 			
-
 	def FoilSpline(self):	
 		self.geom.spline_sup, self.geom.spline_inf = SplineGeom(
 			coord=self.geom.coord,
 			foil_name=self.geom.foil_name)
 
 	def PanelDiv(self):
+		"""
+		Choses the panel division system. There are 2 available, one for CVPM and the other for the LVPM and transpiration method.
+		"""
 		if self.oper.model == 0:
 			self.geom.panels = panel_division_CVPM(
 				coord=self.geom.coord,

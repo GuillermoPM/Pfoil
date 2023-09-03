@@ -35,6 +35,9 @@ class GUI_parameters:
 
 
 class VirtualTerminal(object):
+	"""
+		Virtual terminal in the GUI to allow data visualization.
+	"""
 	def __init__(self,text_widget):
 		self.text_widget = text_widget
 
@@ -182,6 +185,9 @@ class GUI():
 		sys.stdout = VirtualTerminal(terminal)
 
 	def open_foil(self):
+		"""
+			Opens the foil file and changes the parameter fromfile to true.
+		"""
 		foil_file = tkfd.askopenfilename()
 		self.GUIParam.foil_file = os.path.basename(foil_file)
 		self.GUIParam.fromfile = True
@@ -216,11 +222,11 @@ class GUI():
 
 		# Foil file
 		self.file_selector = tk.Button(
-			self.frame1, text="Archivo", command=self.open_foil).grid(row=4, column=1)
+			self.frame1, text= "File", command=self.open_foil).grid(row=4, column=1)
 
 		# Pannels
 		self.entryPanels = tk.IntVar(value=200)
-		self.Panels_lbl = tk.Label(self.frame1, text="Número de paneles")
+		self.Panels_lbl = tk.Label(self.frame1, text="Panel Number")
 		self.Panels_lbl.grid(row=3, column=1)
 		self.Panels_enter = tk.Entry(self.frame1, textvariable=self.entryPanels)
 		self.Panels_enter.grid(row=3, column=2)
@@ -236,7 +242,7 @@ class GUI():
 			Creates the buttons and labels for plot generation
 		"""
 		# Cp plot
-		self.cpshow_btn = tk.Button(self.frame3, text="Distribución de Cp", command=self.PlotCp)
+		self.cpshow_btn = tk.Button(self.frame3, text="Cp distribution", command=self.PlotCp)
 		self.cpshow_btn.grid(row=5, column=1)
 
 		# Geomplot
@@ -248,10 +254,10 @@ class GUI():
 		self.blayer_show.grid(row=8, column=1)
 
 		# Blayer variables
-		variables = ["Displ Thick", "Mom Thick", "Velocidad", "Cf"]
+		variables = ["Displ Thick", "Mom Thick", "Velocity", "Cf"]
 		selected_variable = tk.StringVar()
 		selected_variable.set(variables[0])
-		varlbl = tk.Label(self.frame3, text=" Parámetros capa límite:")
+		varlbl = tk.Label(self.frame3, text= "Boundary layer parameters:")
 		varlbl.grid(row=11, column=1)
 		var_selector = tk.OptionMenu(self.frame3, selected_variable, *variables)
 		var_selector.grid(row=11, column=2)
