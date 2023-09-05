@@ -17,6 +17,10 @@ from LinearVortexPanelMethod.ParamInit import *
 
 
 def LVSolver(Foil):
+	"""
+	Linear Vortex Method solver
+	
+	"""
 
 	Foil.oper.viscous = False
 	# do not distinguish sign of ue if inviscid
@@ -34,13 +38,13 @@ def vortex_builder(Foil, alpha):
 		intensidades de los vórtices con los distintos puntos del perfil.
 
 		INPUT
-		Foil : perfil
-		alpha : ángulo de ataque
+		Foil : airfoil
+		alpha : angle of attack
 
 		OUTPUT
-		Foil.isol.vMatrix : matriz de mapeado de las intensidades de los vórtices
-		Foil.isol.gamref : distribución de intensidades de vórtice para los ángulos de 0 a 90
-		Foil.isol.gam : distribución de intensidades para el alpha indicado
+		Foil.isol.vMatrix : vortex intensity mapping matrix
+		Foil.isol.gamref : vortex intensity distribution
+		Foil.isol.gam : vortex intensity distribution for the indicated angle of attack
 	"""
 	paneles = Foil.geom.paneles
 	N = Foil.N         # number of points
@@ -48,7 +52,7 @@ def vortex_builder(Foil, alpha):
 
 	A = np.zeros((N+2, N+2))  # influence matrix
 	rhs = np.zeros((N+2, 2))  # right-hand sides for 0,90
-	_, hTE, _, tcp, tdp = TE_info(Foil)  # trailing-edge info
+	_, hTE, _, tcp, tdp = trailing_specs(Foil)  # trailing-edge info
 	nogap = (abs(hTE) < 1e-10*Foil.geom.chord)  # indicates no TE gap
 
 	# Matriz de influencia y rhs
@@ -114,7 +118,7 @@ def inviscid_velocity(Foil, gamma, Vinf, alpha, x):
 	V_G = type(object)
 
 	V_G = np.zeros((2, N))
-	_, _, _, tcp, tdp = TE_info(Foil)  # trailing-edge info
+	_, _, _, tcp, tdp = trailing_specs(Foil)  # trailing-edge info
 	# assume x is not a midpoint of a panel (can check for this)
 	for j, panel in enumerate(paneles[:-1]):  # loop over panels
 		a, b = panel_linvortex_velocity(xi=x, panel=panel, vdir=None, midpt=False)

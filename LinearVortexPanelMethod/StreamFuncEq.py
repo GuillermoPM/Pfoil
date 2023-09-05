@@ -88,6 +88,7 @@ def panel_linvortex_velocity(xi, panel, midpt, vdir=None):
 	if vdir is not None:
 		coef1 = np.dot(coef1, vdir)
 		coef2 = np.dot(coef2, vdir)
+		
 	return coef1, coef2
 
 def panel_constsource_stream(panel_i, panel_j):
