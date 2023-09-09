@@ -398,8 +398,8 @@ def calc_ue_m(M):
 						Xj[:, [0, 1]], xi, ti)  # left half-panel ue contrib
 					a2, b2 = panel_linsource_velocity(
 						Xj[:, [1, 2]], xi, ti)  # right half-panel ue contrib
-					Csig[i, N-1+j-1] += a1 + 0.5*b1
-					Csig[i, N-1+j] += 0.5*a2 + b2
+					Csig[i, N-1+j-1] += a1 + 0.5*b1 # type: ignore 
+					Csig[i, N-1+j] += 0.5*a2 + b2  # type: ignore
 	Dw = np.dot(Cgam, Bp) + Csig
 	Dw[0, :] = Bp[-1, :]  # ensure first wake point has same ue as TE
 	M.vsol.ue_sigma = np.concatenate((Bp, Dw))  # store combined matrix
@@ -516,7 +516,7 @@ def init_boundary_layer(M):
 					break
 				ID = np.array([0, 1, 2])
 				A = R_U[:, ID + 4] + R_U[:, ID]
-				b = -1*R
+				b = -1*R # type: ignore 
 				dU = np.concatenate([np.linalg.solve(A, b), [0]])
 
 				# under-relaxation
@@ -585,12 +585,12 @@ def init_boundary_layer(M):
 				if direct:  # direct mode => ue is prescribed => solve for th, ds, sa
 					ID = np.array([0, 1, 2])
 					A = R_U[:, ID+4]
-					b = -1*R
+					b = -1*R  # type: ignore
 					dU = np.concatenate((np.linalg.solve(A, b), [0]))
 				else:  # inverse mode => Hk is prescribed
 					Hk, Hk_U = get_Hk(U[:, i], param)
 					A = np.vstack((R_U[:, 4:], Hk_U))
-					b = np.concatenate((-1*R, [Hktgt-Hk]))
+					b = np.concatenate((-1*R, [Hktgt-Hk])) # type: ignore 
 					dU = np.linalg.solve(A, b)
 
 				# under-relaxation

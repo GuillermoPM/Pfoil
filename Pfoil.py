@@ -14,6 +14,9 @@ from Geometry import *
 
 class Foil():
 	class InvSol:
+		"""
+		Inviscid solution values and parameters
+		"""
 		def __init__(self):
 			self.gamma = 0 			# constant circulation gamma
 			self.gamref = np.array([])
@@ -37,6 +40,7 @@ class Foil():
 			self.chorddist = np.array([],dtype=object)
 	
 	class ConstantVortexSol:
+		"CVPM solution values and parameters"
 		def __init__(self):
 			self.vortexMatrix = type(object)	# vortex mapping matrix
 			self.sourceMatrix = type(object)	# source mapping matrix
@@ -48,6 +52,7 @@ class Foil():
 
 
 	class OperCond:
+		"Operating conditions"
 		def __init__(self):
 			self.Vinf = 1			# freestream velocity
 			self.alpha = 0			# angle of attack
@@ -61,6 +66,7 @@ class Foil():
 			self.viscous = False	# viscous / inviscid flag
 
 	class Wake:
+		"Wake parameters"
 		def __init__(self):
 			self.N = 0
 			self.x = np.array([])
@@ -69,6 +75,7 @@ class Foil():
 			self.wpanels = np.array([])
 
 	class ViscSol:
+		"Viscous solution parameters and results"
 		def __init__(self):
 			self.th = []           # theta = momentum thickness [Nsys]
 			self.ds = []           # delta star = displacement thickness [Nsys]
@@ -86,6 +93,7 @@ class Foil():
 			self.dMatrix = np.array([])
 
 	class GeomParam:
+		"Geometry parameters"
 		def __init__(self):
 			self.chord = 1
 			self.s = np.array([])
@@ -103,6 +111,7 @@ class Foil():
 			self.nPoints = 0
 
 	class Results:
+		"Results"
 		def __init__(self):
 			self.cp = []         # cp distribution
 			self.cl = 0          # lift coefficient
@@ -124,6 +133,7 @@ class Foil():
 			self.Hk = []         # kinematic shape parameter distribution
 
 	class Param:
+		"General parameters"
 		def __init__(self):
 			self.verb = 1
 			self.rtol = 1e-10	# Newton tolerance
@@ -164,6 +174,7 @@ class Foil():
 			self.wake = False
 
 	class GlobalCond:
+		"Global conditions"
 		def __init__(self):
 			self.Nsys = 0
 			self.U = type(object)
