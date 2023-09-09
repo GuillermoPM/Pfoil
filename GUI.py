@@ -51,7 +51,7 @@ class GUI():
 		self.root.geometry("1000x700") 	# Main window geometry
 		self.root.title('Pfoil') 		# Main window title
 
-		self.root.iconbitmap("C:/Pfoil/Config/Icono.ico")
+		self.root.iconbitmap("C:/Pfoil Github/Config/icon.ico")
 	
 		# Creating the frames
 		self.frame1 = tk.Frame(self.root, width=350, height=450)
