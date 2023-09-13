@@ -62,7 +62,6 @@ class Foil():
 			
 			self.model = 0			# model
 			self.initbl = True		# boundary layer initialization
-			self.givencl = False	# Indicador de si se marca un cl
 			self.viscous = False	# viscous / inviscid flag
 
 	class Wake:

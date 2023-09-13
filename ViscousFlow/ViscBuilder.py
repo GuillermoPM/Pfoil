@@ -1,3 +1,8 @@
+"""
+## Viscous builder
+This code was mainly taken from the MFOIL and adapted to Python and modified to fullfill the requirements.
+"""
+
 import numpy as np
 import scipy as sp
 from Geometry import *
@@ -5,55 +10,53 @@ from ViscousFlow.ResidualsBuilder import *
 from ViscousFlow.GlobalSolution import *
 
 
-def get_distributions(M):
+def get_distributions(Foil):
 	"""
-	Computes various distributions (quantities at nodes) and stores them in M.post.
-	Relevant for viscous solutions.
+	Computes the various distributions and stores them in the Foil class.
 	"""
-	assert M.glob.U is not None, 'no global solution'
 
 	# Quantities already in the global state
-	M.post.th = M.glob.U[0, :]  # theta
-	M.post.ds = M.glob.U[1, :]  # delta*
-	M.post.sa = M.glob.U[2, :]  # amp or ctau
+	Foil.post.th = Foil.glob.U[0, :]  # theta
+	Foil.post.ds = Foil.glob.U[1, :]  # delta*
+	Foil.post.sa = Foil.glob.U[2, :]  # amp or ctau
 	# compressible edge velocity
-	M.post.ue = get_uk(M.glob.U[3, :], M.param)[0]
-	M.post.uei = get_ueinv(M)  # compressible inviscid edge velocity
+	Foil.post.ue = get_uk(Foil.glob.U[3, :], Foil.param)[0]
+	Foil.post.uei = get_ueinv(Foil)  # compressible inviscid edge velocity
 
 	# Derived viscous quantities
-	N = M.glob.Nsys
+	N = Foil.glob.Nsys
 	cf = np.zeros(N)
 	Ret = np.zeros(N)
 	Hk = np.zeros(N)
 	for isurf in range(3):   # Loop over surfaces
-		Is = M.vsol.Is[isurf]  # Surface point indices
-		param = build_param(M, isurf)  # Get parameter structure
+		Is = Foil.vsol.Is[isurf]  # Surface point indices
+		param = build_param(Foil, isurf)  # Get parameter structure
 		for i in range(len(Is)):  # Loop over points
 			j = Is[i]
-			Uj = M.glob.U[:, j]
-			param = station_param(M, param, j)
+			Uj = Foil.glob.U[:, j]
+			param = station_param(Foil, param, j)
 			uk = get_uk(Uj[3], param)[0]  # Corrected edge speed
 			cfloc = get_cf(Uj, param)[0]  # Local skin friction coefficient
 			cf[j] = cfloc * uk**2/param.Vinf**2  # Free-stream-based cf
 			Ret[j] = get_Ret(Uj, param)[0]  # Re_theta
 			Hk[j] = get_Hk(Uj, param)[0]  # Kinematic shape factor
-	M.post.cf = cf
-	M.post.Ret = Ret
-	M.post.Hk = Hk
+	Foil.post.cf = cf
+	Foil.post.Ret = Ret
+	Foil.post.Hk = Hk
 
 
-def build_wake(M):
+def build_wake(Foil):
 	"""
 	Builds wake panels from the inviscid solution
 
 	INPUTS:
-		M: mfoil class with a valid inviscid solution (gam)
+		Foil: mfoil class with a valid inviscid solution (gam)
 
 	OUTPUTS:
-		M.wake.N: Nw, the number of wake points
-		M.wake.x: coordinates of the wake points (2xNw)
-		M.wake.s: s-values of wake points (continuation of airfoil) (1xNw)
-		M.wake.t: tangent vectors at wake points (2xNw)
+		Foil.wake.N: Nw, the number of wake points
+		Foil.wake.x: coordinates of the wake points (2xNw)
+		Foil.wake.s: s-values of wake points (continuation of airfoil) (1xNw)
+		Foil.wake.t: tangent vectors at wake points (2xNw)
 
 	DETAILS:
 		Constructs the wake path through repeated calls to inviscid_velocity
@@ -61,20 +64,20 @@ def build_wake(M):
 		Point spacing is geometric; prescribed wake length and number of points
 	"""
 
-	assert M.isol.gam is not None, "No inviscid solution"
-	N = M.N + 1  # number of points on the airfoil
-	Vinf = M.oper.Vinf  # freestream speed
-	Nw = int(np.ceil(N/10 + 10*M.geom.wakelen))  # number of points on wake
-	S = M.geom.s  # airfoil S values
-	# print("S values: ",S)
+	assert Foil.isol.gam is not None, "No inviscid solution"
+	N = Foil.N + 1  # number of points on the airfoil
+	Vinf = Foil.oper.Vinf  # freestream speed
+	Nw = int(np.ceil(N/10 + 10*Foil.geom.wakelen))  # number of points on wake
+	S = Foil.geom.s  # airfoil S values
+
 	ds1 = 0.5*(S[1]-S[0] + S[-1]-S[-2])  # first nominal wake panel size
-	sv = space_geom(ds1, M.geom.wakelen, Nw)  # geometrically-spaced points
+	sv = space_geom(ds1, Foil.geom.wakelen, Nw)  # geometrically-spaced points
 	xyw = np.zeros((2, Nw))  # arrays of x,y points and tangents on wake
 	tw = xyw.copy()
-	xy1 = M.geom.coord[0, :]
-	xyN = M.geom.coord[-1, :]  # airfoil TE points
+	xy1 = Foil.geom.coord[0, :]
+	xyN = Foil.geom.coord[-1, :]  # airfoil TE points
 
-	TE_panel = M.geom.paneles[-1]
+	TE_panel = Foil.geom.paneles[-1]
 	t = np.flip(-1*TE_panel.t*TE_panel.len, axis = 0)
 	n = np.flip(TE_panel.n*TE_panel.len, axis = 0)
 
@@ -87,12 +90,12 @@ def build_wake(M):
 	v1 = v2 = np.ones(2, dtype=object)
 	# loop over rest of wake
 	for i in range(Nw-1):
-		v1 = inviscid_velocity(M, M.isol.gam, Vinf, M.oper.alpha, xyw[:, i])[0]
+		v1 = inviscid_velocity(Foil, Foil.isol.gam, Vinf, Foil.oper.alpha, xyw[:, i])[0]
 		v1 = v1/np.linalg.norm(v1)  # normalized
 		tw[:, i] = v1
 		# forward Euler (predictor) step
 		xyw[:, i+1] = xyw[:, i] + (sv[i+1]-sv[i])*v1
-		v2 = inviscid_velocity(M, M.isol.gam, Vinf, M.oper.alpha, xyw[:, i+1])[0]
+		v2 = inviscid_velocity(Foil, Foil.isol.gam, Vinf, Foil.oper.alpha, xyw[:, i+1])[0]
 		v2 = v2/np.linalg.norm(v2)  # normalized
 		tw[:, i+1] = v2
 		xyw[:, i+1] = xyw[:, i] + (sv[i+1]-sv[i])*0.5*(v1+v2)  # corrector step
@@ -103,11 +106,11 @@ def build_wake(M):
 
 	v = np.empty((2, 1))
 	for i in range(Nw):
-		v = inviscid_velocity(M, M.isol.gam, Vinf, M.oper.alpha, xyw[:, i])[0]
+		v = inviscid_velocity(Foil, Foil.isol.gam, Vinf, Foil.oper.alpha, xyw[:, i])[0]
 		uewi[i] = np.dot(v.T, tw[:, i])
-		v = inviscid_velocity(M,  M.isol.gamref[:, 0], Vinf, 0, xyw[:, i])[0]
+		v = inviscid_velocity(Foil,  Foil.isol.gamref[:, 0], Vinf, 0, xyw[:, i])[0]
 		uewiref[i, 0] = np.dot(v.T, tw[:, i])
-		v = inviscid_velocity(M, M.isol.gamref[:, 1], Vinf, 90, xyw[:, i])[0]
+		v = inviscid_velocity(Foil, Foil.isol.gamref[:, 1], Vinf, 90, xyw[:, i])[0]
 		uewiref[i, 1] = np.dot(v.T, tw[:, i])
 
 	wakepanels = np.empty(Nw-1, dtype=object)
@@ -115,21 +118,21 @@ def build_wake(M):
 		wakepanels[i] = Wakepanel(coordmin=xyw[:, i], coordmax=xyw[:, i+1], i=i+1)
 
 	# set values
-	M.wake.N = Nw
-	M.wake.wpaneles = wakepanels
-	M.wake.x = xyw
-	M.wake.s = sw
-	M.wake.t = tw
-	M.isol.uewi = uewi
-	M.isol.uewiref = uewiref
+	Foil.wake.N = Nw
+	Foil.wake.wpaneles = wakepanels
+	Foil.wake.x = xyw
+	Foil.wake.s = sw
+	Foil.wake.t = tw
+	Foil.isol.uewi = uewi
+	Foil.isol.uewiref = uewiref
 
 
 def wake_init(Foil, ue):
 	"""
 	Initializes the first point of the wake, using data in M.glob.U
 	
-	Args:
-	- M: instance of a class containing data on the mesh and its properties
+	Input:
+	- Foil: Foil class with inviscid solution
 	- ue: edge velocity at the wake point
 	
 	Returns:
@@ -146,8 +149,10 @@ def wake_init(Foil, ue):
 def wake_sys(Foil, param):
 	"""
 	Builds residual system corresponding to wake initialization
+
 	INPUT
 	  param  : parameters
+
 	OUTPUT
 	  R   : 3x1 residual vector for th, ds, sa
 	  R_U : 3x12 residual linearization, as three 3x4 blocks
@@ -194,14 +199,16 @@ def wake_sys(Foil, param):
 def stagpoint_find(Foil):
 	"""
 	finds the LE stagnation point on the airfoil (using inviscid solution)
+
 	INPUTS
-	  M  : mfoil class with inviscid solution, gam
+	  Foil  : mfoil class with inviscid solution, gam
+
 	OUTPUTS
-	  M.isol.sstag   : scalar containing s value of stagnation point
-	  M.isol.sstag_g : linearization of sstag w.r.t gamma (1xN)
-	  M.isol.Istag   : [i,i+1] node indices before/after stagnation (1x2)
-	  M.isol.sgnue   : sign conversion from CW to tangential velocity (1xN)
-	  M.isol.xi      : distance from stagnation point at each node (1xN)
+	  Foil.isol.sstag   : scalar containing s value of stagnation point
+	  Foil.isol.sstag_g : linearization of sstag w.r.t gamma (1xN)
+	  Foil.isol.Istag   : [i,i+1] node indices before/after stagnation (1x2)
+	  Foil.isol.sgnue   : sign conversion from CW to tangential velocity (1xN)
+	  Foil.isol.xi      : distance from stagnation point at each node (1xN)
 	
 	"""
 
@@ -277,10 +284,7 @@ def set_wake_gap(Foil):
 	Sets height (delta*) of dead air in wake.
 
 	Parameters:
-	M (mfoil class): mfoil class with wake built and stagnation point found
-
-	Returns:
-	None. The function updates M.vsol.wgap with wake gap at each wake point.
+	Foil: Foil class with wake built and stagnation point found
 
 	Details:
 	Uses cubic function to extrapolate the TE gap into the wake.
@@ -408,7 +412,7 @@ def calc_ue_m(M):
 	rebuild_ue_m(M)
 
 
-def rebuild_ue_m(M):
+def rebuild_ue_m(Foil):
 	"""
 	Rebuilds ue_m matrix after stagnation panel change (new sgnue)
 	
@@ -425,38 +429,42 @@ def rebuild_ue_m(M):
 		airfoil panel sources are constant strength
 		wake panel sources are two-piece linear
 	"""
-	assert M.vsol.ue_sigma is not None, "Need ue_sigma to build ue_m"
+	assert Foil.vsol.ue_sigma is not None, "Need ue_sigma to build ue_m"
 
 	# Dp = d(source)/d(mass)  [(N+Nw-2) x (N+Nw)]  (sparse)
-	N, Nw = M.N+1, M.wake.N  # number of points on the airfoil/wake
+	N, Nw = Foil.N+1, Foil.wake.N  # number of points on the airfoil/wake
 	# Dp = sp.sparse.csr_matrix((2 * (N + Nw - 1), N-1 + Nw))
 	Dp = sp.sparse.lil_matrix((N + Nw - 2, N + Nw), dtype=float)
 	# Dp = np.array((N+Nw-1,N+Nw+1),dtype=object)
 	for i in range(N-1):
-		ds = M.geom.s[i + 1] - M.geom.s[i]
+		ds = Foil.geom.s[i + 1] - Foil.geom.s[i]
 		# Note, at stagnation: ue = K*s, dstar = const, m = K*s*dstar
 		# sigma = dm/ds = K*dstar = m/s (separate for each side, +/-)
-		Dp[i, [i, i + 1]] = M.isol.sgnue[[i, i + 1]] * np.array([-1, 1]) / ds
+		Dp[i, [i, i + 1]] = Foil.isol.sgnue[[i, i + 1]] * np.array([-1, 1]) / ds
 	for i in range(Nw - 1):
-		ds = M.wake.s[i + 1] - M.wake.s[i]
+		ds = Foil.wake.s[i + 1] - Foil.wake.s[i]
 		Dp[N - 1 + i, [N + i, N + i + 1]] = np.array([-1, 1]) / ds
 
-	M.vsol.sigma_m = Dp
+	Foil.vsol.sigma_m = Dp
 
 	# sign of ue at all points (wake too)
-	sgue = np.hstack([M.isol.sgnue, np.ones(Nw)])
+	sgue = np.hstack([Foil.isol.sgnue, np.ones(Nw)])
 
 	# ue_m = ue_sigma * sigma_m [(N+Nw) x (N+Nw)] (not sparse)
-	M.vsol.ue_m = sp.sparse.diags(
-		sgue, 0, (N + Nw, N + Nw)) @ M.vsol.ue_sigma @ M.vsol.sigma_m
+	Foil.vsol.ue_m = sp.sparse.diags(
+		sgue, 0, (N + Nw, N + Nw)) @ Foil.vsol.ue_sigma @ Foil.vsol.sigma_m
 
 
 def init_boundary_layer(M):
-	# initializes BL solution on foil and wake by marching with given edge vel, ue
-	# INPUT
-	#   The edge velocity field ue must be filled in on the airfoil and wake
-	# OUTPUT
-	#   The state in M.glob.U is filled in for each point
+	"""
+	Initializes the boundary layer both on foil and wake using the given edge velocity.
+
+	INPUT
+	  The edge velocity field ue must be filled in on the airfoil and wake
+
+	OUTPUT
+	  The state vector U is filled in Foil.glob.U
+	"""
 
 	Hmaxl = 3.8  # above this shape param value, laminar separation occurs
 	Hmaxt = 2.5  # above this shape param value, turbulent separation occurs
@@ -790,15 +798,15 @@ def stagpoint_move(M):
 		rebuild_ue_m(M)
 
 
-def solve_coupled(M):
+def solve_coupled(Foil):
 	"""
 	Solves the coupled inviscid and viscous system
 	
-	Args:
-	- M: mfoil class with an inviscid solution
+	Input:
+	- Foil: foil class with an inviscid solution and a generated boundary layer
 	
-	Returns:
-	- M.glob.U: global coupled solution
+	Output:
+	- Foil.glob.U: global coupled solution
 	
 	Details:
 	- Inviscid solution should exist, and BL variables should be initialized
@@ -815,42 +823,42 @@ def solve_coupled(M):
 	
 	Newton loop
 	"""
-	nNewton = M.param.niglob  # number of iterations
-	M.glob.conv = False
-	print(M.param, 1, '\n <<< Beginning coupled solver iterations >>> \n')
+	nNewton = Foil.param.niglob  # number of iterations
+	Foil.glob.conv = False
+	print(Foil.param, 1, '\n <<< Beginning coupled solver iterations >>> \n')
 	for iNewton in range(1, nNewton+1):
 		# set up the global system
-		build_glob_sys(M)
+		build_glob_sys(Foil)
 
 		# compute forces
-		calc_force(M)
+		calc_force(Foil)
 
 		# convergence check
 		print("I newton : ", iNewton)
-		Rnorm = np.linalg.norm(M.glob.R, 2)
-		print(M.param, 1, '\nNewton iteration %d, Rnorm = %.5e\n' %
+		Rnorm = np.linalg.norm(Foil.glob.R, 2)
+		print(Foil.param, 1, '\nNewton iteration %d, Rnorm = %.5e\n' %
 					(iNewton, Rnorm))
-		if Rnorm < M.param.rtol:
-			M.glob.conv = True
+		if Rnorm < Foil.param.rtol:
+			Foil.glob.conv = True
 			break
 
 		# solve global system
-		solve_glob(M)
+		solve_glob(Foil)
 
 		# update the state
-		update_state(M)
+		update_state(Foil)
 
 		# update stagnation point; Newton still OK; had R_x effects in R_U
-		stagpoint_move(M)
+		stagpoint_move(Foil)
 
 		# update transition
-		update_transition(M)
+		update_transition(Foil)
 
-	if not M.glob.conv:
-		print(M.param, 1, '\n** Global Newton NOT CONVERGED **\n')
+	if not Foil.glob.conv:
+		print(Foil.param, 1, '\n** Global Newton NOT CONVERGED **\n')
 
 
-def update_state(M):
+def update_state(Foil):
 	"""
 	Updates state, taking into account physical constraints.
 	
@@ -864,22 +872,17 @@ def update_state(M):
 		U = U + omega * dU; omega = under-relaxation factor
 		Calculates omega to prevent big changes in the state or negative values
 	"""
-	# Error check
-	if any(M.glob.U[2, :].imag):
-		raise ValueError('imaginary amp in U')
-	if any(M.glob.dU[2, :].imag):
-		raise ValueError('imaginary amp in dU')
 
 	# max ctau
-	It = M.vsol.turb.nonzero()[0]
-	ctmax = M.glob.U[2, It].max()
+	It = Foil.vsol.turb.nonzero()[0]
+	ctmax = Foil.glob.U[2, It].max()
 
 	# starting under-relaxation factor
 	omega = 1.0
 
 	# first limit theta and delta*
 	for k in range(2):
-		Uk, dUk = M.glob.U[k, :], M.glob.dU[k, :]
+		Uk, dUk = Foil.glob.U[k, :], Foil.glob.dU[k, :]
 		# prevent big decreases in th, ds
 		fmin = (dUk / Uk).min()
 		#  most negative ratio
@@ -892,11 +895,11 @@ def update_state(M):
 			print(f'  th/ds decrease: omega = {omega:.5f}')
 
 	# limit negative amp/ctau
-	Uk, dUk = M.glob.U[2, :], M.glob.dU[2, :]
+	Uk, dUk = Foil.glob.U[2, :], Foil.glob.dU[2, :]
 	for i, (uk, duk) in enumerate(zip(Uk, dUk)):
-		if not M.vsol.turb[i] and uk < 0.2:
+		if not Foil.vsol.turb[i] and uk < 0.2:
 			continue  # do not limit very small amp (too restrictive)
-		if M.vsol.turb[i] and uk < 0.1 * ctmax:
+		if Foil.vsol.turb[i] and uk < 0.1 * ctmax:
 			continue  # do not limit small ctau
 		if uk == 0. or duk == 0.:
 			continue
@@ -907,8 +910,8 @@ def update_state(M):
 				print(f'  neg sa: omega = {omega:.5f}')
 
 	# prevent big changes in amp
-	I = np.where(M.vsol.turb == 0)[0]
-	if any(M.glob.U[2, I].imag):
+	I = np.where(Foil.vsol.turb == 0)[0]
+	if any(Foil.glob.U[2, I].imag):
 		raise ValueError('imaginary amplification')
 	dumax = abs(dUk[I]).max()
 	if dumax > 0:
@@ -931,8 +934,8 @@ def update_state(M):
 		print(f'  ctau: omega = {omega:.5f}')
 
 	# prevent large ue changes
-	dUk = M.glob.dU[3, :]
-	fmax = abs(dUk / M.oper.Vinf).max()
+	dUk = Foil.glob.dU[3, :]
+	fmax = abs(dUk / Foil.oper.Vinf).max()
 	if fmax > 0:
 		om = 0.2 / fmax
 	else:
@@ -942,12 +945,12 @@ def update_state(M):
 		omega = om
 		print(f'  ue: omega = {omega:.5f}\n')
 
-	if abs(M.glob.dalpha) > 2:
-		omega = min(omega, abs(2/M.glob.dalpha))
+	if abs(Foil.glob.dalpha) > 2:
+		omega = min(omega, abs(2/Foil.glob.dalpha))
 
 	print(f'  state update: under-relaxation = {omega:.5f}\n')
-	M.glob.U = M.glob.U + omega * M.glob.dU
-	M.oper.alpha = M.oper.alpha + omega * M.glob.dalpha
+	Foil.glob.U = Foil.glob.U + omega * Foil.glob.dU
+	Foil.oper.alpha = Foil.oper.alpha + omega * Foil.glob.dalpha
 
 	Uj = np.zeros(4)
 	for i_s in range(3):
@@ -955,23 +958,23 @@ def update_state(M):
 			Hkmin = 1.00005
 		else:
 			Hkmin = 1.02
-		Is = M.vsol.Is[i_s]
-		param = build_param(M, i_s)
+		Is = Foil.vsol.Is[i_s]
+		param = build_param(Foil, i_s)
 		for i in range(len(Is)):
 			j = Is[i]
-			Uj = M.glob.U[:, j]
-			param = station_param(M, param, j)
+			Uj = Foil.glob.U[:, j]
+			param = station_param(Foil, param, j)
 			Hk, _ = get_Hk(Uj, param)
 			if Hk < Hkmin:
-				M.glob.U[1, j] += 2 * (Hkmin - Hk) * M.glob.U[0, j]
+				Foil.glob.U[1, j] += 2 * (Hkmin - Hk) * Foil.glob.U[0, j]
 
 	for ii in range(len(I)):
 		i = It[ii]
-		if M.glob.U[2, i] < 0:
-			M.glob.U[2, i] = 0.1 * ctmax
+		if Foil.glob.U[2, i] < 0:
+			Foil.glob.U[2, i] = 0.1 * ctmax
 
-	if abs(omega * M.glob.dalpha) > 1e-10:
-		rebuild_isol(M)
+	if abs(omega * Foil.glob.dalpha) > 1e-10:
+		rebuild_isol(Foil)
 
 
 def build_glob_sys(M):
@@ -1168,7 +1171,7 @@ def update_transition(M):
 
 
 
-def march_amplification(M, is_):
+def march_amplification(Foil, is_):
 	"""
 	Marches amplification equation on surface is
 	:param M: input matrix M
@@ -1176,11 +1179,11 @@ def march_amplification(M, is_):
 	:return: ilam - index of last laminar station before transition
 			 M.glob.U - updated with amp factor at each (new) laminar station
 	"""
-	Is = M.vsol.Is[is_]  # surface point indices
+	Is = Foil.vsol.Is[is_]  # surface point indices
 	N = len(Is)  # number of points
-	param = build_param(M, is_)  # get parameter structure
-	U = M.glob.U[:, Is]  # states
-	turb = M.vsol.turb[Is]  # turbulent station flag
+	param = build_param(Foil, is_)  # get parameter structure
+	U = Foil.glob.U[:, Is]  # states
+	turb = Foil.vsol.turb[Is]  # turbulent station flag
 
 	# loop over stations, calculate amplification
 	U[2, 0] = 0.0  # no amplification at first station
@@ -1192,7 +1195,7 @@ def march_amplification(M, is_):
 		U2 = U[:, i]  # states
 		if turb[i]:
 			U2[2] = U1[2] * 1.01  # initialize amp if turb
-		dx = M.isol.xi[Is[i]] - M.isol.xi[Is[i - 1]]  # interval length
+		dx = Foil.isol.xi[Is[i]] - Foil.isol.xi[Is[i - 1]]  # interval length
 
 		# Newton iterations, only needed if adding extra amplification in damp
 		nNewton = 20
@@ -1230,7 +1233,7 @@ def march_amplification(M, is_):
 				param, 2, f"  march_amplification (is,i={is_},{i}): {U2[2]:.5e} is above critical.\n")
 			break
 		else:
-			M.glob.U[2, Is[i]] = U2[2]  # store amplification in M.glob.U
+			Foil.glob.U[2, Is[i]] = U2[2]  # store amplification in M.glob.U
 			U[2, i] = U2[2]  # also store in local copy!
 			if abs(U[2, i].imag) > 0:
 				raise ValueError('imaginary amp during march')
@@ -1240,17 +1243,19 @@ def march_amplification(M, is_):
 
 
 def stagnation_state(U, x):
-	# INPUT
-	#   U  : [U1,U2] = states at first two nodes (4x2)
-	#   x  : [x1,x2] = x-locations of first two nodes (2x1)
-	# OUTPUT
-	#   Ust    : stagnation state (4x1)
-	#   Ust_U  : linearization of Ust w.r.t. U1 and U2 (4x8)
-	#   Ust_x  : linearization of Ust w.r.t. x1 and x2 (4x2)
-	#   xst    : stagnation point location ... close to 0
-	# DETAILS
-	#   fits a quadratic to the edge velocity: 0 at x=0, then through two states
-	#   linearly extrapolates other states in U to x=0, from U1 and U2
+	"""
+	INPUT
+	  U  : [U1,U2] = states at first two nodes (4x2)
+	  x  : [x1,x2] = x-locations of first two nodes (2x1)
+	OUTPUT
+	  Ust    : stagnation state (4x1)
+	  Ust_U  : linearization of Ust w.r.t. U1 and U2 (4x8)
+	  Ust_x  : linearization of Ust w.r.t. x1 and x2 (4x2)
+	  xst    : stagnation point location ... close to 0
+	DETAILS
+	  fits a quadratic to the edge velocity: 0 at x=0, then through two states
+	  linearly extrapolates other states in U to x=0, from U1 and U2
+	"""
 
 	# pull off states
 	U1 = U[:, 0]
@@ -1297,8 +1302,12 @@ def stagnation_state(U, x):
 def ViscousSolver(Foil):
 	"""
 	Solves the viscous system (BL + outer flow concurrently)
-	:param M: mfoil class with an airfoil
-	:return: M.glob.U: global solution, M.post: post-processed quantities
+	
+	Input:
+	Foil : foil class
+
+	Output:
+	Viscous Solver
 	"""
 	
 	LVSolver(Foil)

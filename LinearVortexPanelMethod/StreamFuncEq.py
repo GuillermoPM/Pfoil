@@ -141,7 +141,7 @@ def panel_constsource_velocity(xi, panel, vdir=None):
 		INPUT:
         xi : calculation point
         panel : panel studied
-        midpt : flag that check if the point is at the middle of the panel
+        midpt : flag that checks if the point is at the middle of the panel
         vdir : velocity vector direction (if specified)
 
 		OUTPUT:
