@@ -35,8 +35,6 @@ def panel_linvortex_stream(panel_i, panel_j):
 	else:
 		logr2 = np.log(r2)
 
-	# print("r2,r1",r2,r1)
-
 	S1 = 0.5/np.pi * (y*(theta2 - theta1) - panel_j.len + x1*logr1 - (x1-panel_j.len)*logr2)
 	S2 = x1/panel_j.len * S1 + 0.25/(np.pi*panel_j.len)*(r2**2*logr2 - r1**2 *
                                   logr1 - 0.5*r2**2 + 0.5*r1**2)

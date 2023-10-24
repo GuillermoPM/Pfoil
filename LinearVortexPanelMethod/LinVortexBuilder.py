@@ -26,17 +26,28 @@ def LVSolver(Foil):
 	# do not distinguish sign of ue if inviscid
 	Foil.isol.sgnue = np.ones(Foil.N+1)
 	vortex_builder(Foil, Foil.oper.alpha)
-	if (Foil.oper.givencl):
-		cltrim_inviscid(Foil)
 	calc_force(Foil)
 	Foil.glob.conv = True  # no coupled system ... convergence is guaranteed
 
 
 def vortex_builder(Foil, alpha):
 	"""
+<<<<<<< Updated upstream
+=======
+		Calculates the matrix that maps the vortex intensity distribution with the different airfoil points.
+
+		INPUT
+		Foil : airfoil
+		alpha : angle of attack
+
+		OUTPUT
+		Foil.isol.vMatrix : vortex intensity mapping matrix
+		Foil.isol.gamref : vortex intensity distribution
+		Foil.isol.gam : vortex intensity distribution for the indicated angle of attack
+>>>>>>> Stashed changes
 	"""
-	paneles = Foil.geom.paneles
-	N = Foil.N         # number of points
+	panels = Foil.geom.panels
+	N = Foil.N   
 	coord = Foil.geom.coord
 
 	A = np.zeros((N+2, N+2))  # influence matrix
@@ -44,27 +55,27 @@ def vortex_builder(Foil, alpha):
 	_, hTE, _, tcp, tdp = trailing_specs(Foil)  # trailing-edge info
 	nogap = (abs(hTE) < 1e-10*Foil.geom.chord)  # indicates no TE gap
 
-	# Matriz de influencia y rhs
-	for i, panel_i in enumerate(paneles):
-		xi = coord[i, :]  # coordenadas de cada nodo
-		for j, panel_j in enumerate(paneles[:-1]):  # Se excluye el panel del TE
+	# Influence matrix and rhs of equation
+	for i, panel_i in enumerate(panels):
+		xi = coord[i, :]  # node coordinates
+		for j, panel_j in enumerate(panels[:-1]):  # TE panel is excluded
 			aij, bij = panel_linvortex_stream(panel_i=panel_i, panel_j=panel_j)
 			A[i, j] = A[i, j] + aij
 			A[i, j+1] = A[i, j+1] + bij
-			A[i, -1] = -1  # El último elemento es la línea de corriente en el perfil
+			A[i, -1] = -1  # Last element is streamline
 		# right-hand sides
 		rhs[i, :] = [-xi[1], xi[0]]
-		# TE influencia del source
-		a = panel_constsource_stream(panel_i=panel_i, panel_j=paneles[-1])
+		# TE source influence
+		a = panel_constsource_stream(panel_i=panel_i, panel_j=panels[-1])
 
 		A[i, 0] = A[i, 0] - a*(0.5*tcp)
 		A[i, N] = A[i, N] + a*(0.5*tcp)
 		# TE influencia vórtice
-		a, b = panel_linvortex_stream(panel_i=panel_i, panel_j=paneles[-1])
+		a, b = panel_linvortex_stream(panel_i=panel_i, panel_j=panels[-1])
 		A[i, 0] = A[i, 0] - (a+b)*(-0.5*tdp)
 		A[i, N] = A[i, N] + (a+b)*(-0.5*tdp)
 
-	# Ecuación especial en caso de no haber hueco en el TE
+	# No TE gap
 	if nogap:
 		A[N, :] = 0
 		A[N, [0, 1, 2, N-2, N-1, N]] = [1, -2, 1, -1, 2, -1]
@@ -73,50 +84,36 @@ def vortex_builder(Foil, alpha):
 	A[N+1, 0] = 1
 	A[N+1, N] = 1
 
-	# Resolución del sistema
+	# Solving the system
 	Foil.isol.vMatrix = A
 	g = np.linalg.solve(Foil.isol.vMatrix, rhs)
-	# Se elimina el valor de la línea de corriente en la superficie
+
 	Foil.isol.gamref = np.array(g[:-1, :])
 	Foil.isol.gam = Foil.isol.gamref[:, 0] * np.cos(np.deg2rad(
 		alpha)) + Foil.isol.gamref[:, 1] * np.sin(np.deg2rad(alpha))
 
 
 def inviscid_velocity(Foil, gamma, Vinf, alpha, x):
-	# returns inviscid velocity at x due to gamma (G) on panels X, and Vinf
-	# INPUT
-	#   X     : coordinates of N panel nodes (N-1 panels) (Nx2)
-	#   G     : vector of gamma values at each airfoil node (Nx1)
-	#   Vinf  : freestream speed magnitude
-	#   alpha : angle of attack (degrees)
-	#   x     : location of point at which velocity vector is desired
-	# OUTPUT
-	#   V    : velocity at the desired point (2x1)
-	#   V_G  : (optional) linearization of V w.r.t. G, (2xN)
-	# DETAILS
-	#   Uses linear vortex panels on the airfoil
-	#   Accounts for TE const source/vortex panel
-	#   Includes the freestream contribution
 
-	paneles = Foil.geom.paneles
+	panels = Foil.geom.panels
 	X = Foil.geom.coord
 
-	N = len(X)  # número de puntos (Npaneles +1 )
+	N = len(X)  # (Npanels +1 )
 	V = np.zeros(2)  # velocity
 
 	V_G = type(object)
 
 	V_G = np.zeros((2, N))
 	_, _, _, tcp, tdp = trailing_specs(Foil)  # trailing-edge info
-	# assume x is not a midpoint of a panel (can check for this)
-	for j, panel in enumerate(paneles[:-1]):  # loop over panels
+
+	for j, panel in enumerate(panels[:-1]):  # loop over panels
 		a, b = panel_linvortex_velocity(xi=x, panel=panel, vdir=None, midpt=False)
 		V += a*gamma[j] + b*gamma[j+1]
 
 		V_G[:, j] += a
 		V_G[:, j+1] += b
 	# TE source influence
-	a = panel_constsource_velocity(xi=x, panel=paneles[-1], vdir=None)
+	a = panel_constsource_velocity(xi=x, panel=panels[-1], vdir=None)
 	f1 = a*(-0.5*tcp)
 	f2 = a*0.5*tcp
 	V += f1*gamma[0] + f2*gamma[-1]
@@ -125,7 +122,7 @@ def inviscid_velocity(Foil, gamma, Vinf, alpha, x):
 	V_G[:, N-1] += f2
 	# TE vortex influence
 	a, b = panel_linvortex_velocity(
-		panel=paneles[-1], xi=x, vdir=None, midpt=False)
+		panel=panels[-1], xi=x, vdir=None, midpt=False)
 	f1 = (a+b)*(0.5*tdp)
 	f2 = (a+b)*(-0.5*tdp)
 	V += f1*gamma[0] + f2*gamma[-1]
@@ -144,10 +141,10 @@ def calc_force(Foil):
 	
 	
 	"""
-	N = Foil.N + 1  # Número de puntos en el perfil
+	N = Foil.N + 1  # foil points
 	coord = Foil.geom.coord
 	xref = Foil.geom.xref
-	paneles = Foil.geom.paneles
+	panels = Foil.geom.panels
 	Vinf = Foil.param.Vinf
 	rho = Foil.oper.rho
 	alpha = Foil.oper.alpha
@@ -170,7 +167,7 @@ def calc_force(Foil):
 	cl = cl_alpha = cm = cdpi = 0
 	cl_ue = np.zeros(N)
 
-	for i, panel in enumerate(paneles[:-1]):
+	for i, panel in enumerate(panels[:-1]):
 		x1 = panel.leftcoord
 		x2 = panel.rightcoord
 		panel_vector = panel.t*panel.len
@@ -245,7 +242,7 @@ def calc_force(Foil):
 	if Foil.oper.viscous:
 		if Foil.vsol.Xt[0, 1] ==0:
 			Foil.vsol.Xt[0, 1] = 1
-		print("Resultados viscosos para alpha = ", Foil.oper.alpha, ": \n", "cl = ", Foil.post.cl, "\n cd = ",
+		print("Viscous results for alpha = ", Foil.oper.alpha, ": \n", "cl = ", Foil.post.cl, "\n cd = ",
 				Foil.post.cd, "\n cdpi = ", Foil.post.cdpi, "\n cdf = ", Foil.post.cdf, "\n cdp = ", Foil.post.cdp, "\n cm = ", Foil.post.cm, "\n Xt intrados = ", Foil.vsol.Xt[0, 1], "\n Xt extrados = ", Foil.vsol.Xt[1, 1])
 
 	else:
@@ -264,7 +261,7 @@ def get_ueinv(M):
 		The airfoil velocity is computed directly from gamma
 		The tangential velocity is measured + in the streamwise direction
 	"""
-	# assert M.isol.gam.size > 0, 'No inviscid solution'
+
 	alpha = M.oper.alpha
 	cs = np.array([np.cos(np.deg2rad(alpha)), np.sin(np.deg2rad(alpha))])
 	uea = M.isol.sgnue.T * np.dot(M.isol.gamref, cs)  # airfoil
@@ -275,35 +272,6 @@ def get_ueinv(M):
 		uew = []
 	ueinv = np.concatenate((uea, uew))  # airfoil/wake edge velocity
 	return ueinv
-
-
-def cltrim_inviscid(M):
-	"""
-	Trims inviscid solution to prescribed target cl, using alpha
-	INPUT
-		M : mfoil structure
-	OUTPUT
-		inviscid vorticity distribution is computed for a given cl
-	DETAILS
-		Iterates using cl_alpha computed in post-processing
-		Accounts for cl_ue in total derivative
-	"""
-	for i in range(15):  # trim iterations
-		alpha = M.oper.alpha  # current angle of attack
-		calc_force(M)  # calculate current cl and linearization
-		R = M.post.cl - M.oper.cltgt
-		if np.linalg.norm(R) < 1e-10:
-			break
-		sc = np.array([-np.sin(np.deg2rad(alpha)),
-                 np.cos(np.deg2rad(alpha))]) * np.pi/180
-		cl_a = M.post.cl_alpha + M.post.cl_ue*(M.isol.gamref*sc)  # total deriv
-		dalpha = -R/cl_a
-		M.oper.alpha = alpha + min(max(dalpha, -2), 2)
-		if i >= 14:
-			print('** inviscid cl trim not converged **')
-	M.isol.gam = M.isol.gamref * \
-            np.array([np.cos(np.deg2rad(M.oper.alpha)),
-                      np.sin(np.deg2rad(M.oper.alpha))])
 
 
 def get_ueinvref(M):

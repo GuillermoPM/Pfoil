@@ -1,11 +1,11 @@
 """
 	## Geometry definition functions
-	>>> pannel \n
+	>>> panel \n
 	>>> Wakepanel \n
 	>>> Segment \n
 	>>> SplineGeom \n
 	>>> SplineLen \n
-	>>> pannel_Division \n
+	>>> panel_Division \n
 	>>> NacaFoil \n
 	>>> Wake_Division \n
 	>>> xPond \n
@@ -17,24 +17,24 @@ from scipy.interpolate import PchipInterpolator
 import numpy as np
 import matplotlib.pyplot as plt
 
-class Pannel():
+class Panel():
 	"""
-	A pannel is deffined from it's extreme points and the angle between the normal and the horizontal.
+	A panel is deffined from it's extreme points and the angle between the normal and the horizontal.
 
 	>>> Panel(coordmin, coordmax, identnumber)
 
 	### Args:
 
-	(xmin, ymin) -> First pannel point
-	(xmax, ymax) -> Second pannel point
+	(xmin, ymin) -> First panel point
+	(xmax, ymax) -> Second panel point
 	i -> Identification number
 	
 	### Params:
 
 	beta : Angle between the normal and the horizontal \n
 	lug : Flag for the position (upper or lower) \n
-	intens : pannel intensity \n
-	cpi : Pressure coefficient induced by the pannel \n
+	intens : panel intensity \n
+	cpi : Pressure coefficient induced by the panel \n
 	Vt : Tangential velocity \n
 	(midx, midy) : Midpoint \n
 
@@ -46,9 +46,9 @@ class Pannel():
 		self.xmin, self.ymin = coordmin[0], coordmin[1]		# (xmin, ymin) point
 		self.xmax, self.ymax = coordmax[0], coordmax[1]		# (xmax, ymax) point
 		
-		self.len = ((self.xmax-self.xmin)**2+(self.ymax-self.ymin)**2)**0.5  # pannel length
+		self.len = ((self.xmax-self.xmin)**2+(self.ymax-self.ymin)**2)**0.5  # panel length
 		
-		self.ident = i  # pannel identification
+		self.ident = i  # panel identification
 
 		# Parameter initialization
 		self.Vi = 0.		# induced velocity
@@ -58,7 +58,7 @@ class Pannel():
 		self.Cpi_visc = 0.	# viscous pressure coefficient
 
 		self.midx, self.midy = (self.xmax + self.xmin)/2, (self.ymax+self.ymin)/2  
-		self.midpt = np.array([self.midx, self.midy])  # pannel midpoint
+		self.midpt = np.array([self.midx, self.midy])  # panel midpoint
 
 		self.t = np.array([self.xmax - self.xmin,self.ymax - self.ymin])	# tangential vector
 		self.t = self.t/np.linalg.norm(self.t)								# type: ignore # tangential vector normalized
@@ -78,21 +78,21 @@ class Pannel():
 		if self.phi > 2*np.pi:
 			self.phi -= 2*np.pi
 
-		# Pannel location flag
+		# panel location flag
 		if self.beta <= np.pi:
 			self.lug = 'upper'
 		elif self.beta > np.pi:
 			self.lug = 'lower'
 
 	def __repr__(self):
-		return 'pannel ' + str(self.ident) + ' : (' + str(self.xmin)+',' +\
+		return 'panel ' + str(self.ident) + ' : (' + str(self.xmin)+',' +\
 				str(self.ymin)+') ' + '(' + str(self.xmax)+',' + str(self.ymax) + \
 				') ' + ' ' + 'Lugar: ' + \
 				str(self.lug) + '\n' + 'V : ' + str(self.Vi)
 
-class Wakepanel(Pannel):
+class Wakepanel(Panel):
 	"""
-		A wake pannel is a pannel located at the wake
+		A wake panel is a panel located at the wake
 	"""
 
 	def __init__(self, coordmin, coordmax, i):
@@ -112,7 +112,7 @@ def Segment(pt1, pt2):
 def SplineGeom(coord, foil_name):
 	"""
 	Gives the splines that interpolate the foil coordinates. The foil is divided in upper and lower and the splines are stored in
-	variables and are introduced in the pannel division function
+	variables and are introduced in the panel division function
 
 	INPUT:
 	coord : foil coordinate array (2 x N)
@@ -196,13 +196,13 @@ def panel_division(coord, N, foil_name, presc):
 	for item in ypi:
 		yp.append(item)
 
-	# pannel generation
+	# panel generation
 	panels = np.empty(N+1, dtype=object)
 	coords = np.array(list(zip(xp,yp)))
 	for i in range(N):
-		panels[i] = Pannel(coords[i],coords[i+1], i+1)
+		panels[i] = Panel(coords[i],coords[i+1], i+1)
 
-	panels[-1] = Pannel(coords[-1], coords[0], 999)
+	panels[-1] = Panel(coords[-1], coords[0], 999)
 
 	return panels, coords
 
@@ -346,7 +346,7 @@ def Sval(Foil):
 	# Variable definitions
 	geom_sup = Foil.geom.spline_sup 		# lower spline
 	geom_inf = Foil.geom.spline_inf 		# upper spline
-	panneles = Foil.geom.panneles 			# panels
+	paneles = Foil.geom.paneles 			# panels
 	wakepanels = Foil.geom.wakepanels 		# wake panels
 	xPoints = Foil.geom.coord[:, 0] 		# x coordinates of the different nodes
 
@@ -365,16 +365,16 @@ def Sval(Foil):
 	s_stg = s_totSup + SplineLen(geom_inf, Foil.isol.x_stg)
 	Foil.isol.xi = np.array(abs(s_stg - Foil.isol.svalue))
 
-	x_sup1 = [pannel.midx for pannel in panneles if pannel.ident < int(Foil.N/2)]
+	x_sup1 = [panel.midx for panel in paneles if panel.ident < int(Foil.N/2)]
 	x_sup1.reverse()
 	x_sup1 = np.array(x_sup1)
-	x_sup2 = [pannel.midx for pannel in panneles if int(Foil.N/2) <= pannel.ident <= Foil.isol.stgpannel]
+	x_sup2 = [panel.midx for panel in paneles if int(Foil.N/2) <= panel.ident <= Foil.isol.stgpanel]
 	x_sup2.reverse()
 	x_sup2 = np.array(x_sup2)
 	x_sup = np.concatenate((x_sup1, x_sup2))
 	x_inf = np.array(
-		[pannel.midx for pannel in panneles if pannel.ident >= Foil.isol.stgpannel])
-	x_wake = np.array([pannel.midx for pannel in wakepanels])
+		[panel.midx for panel in paneles if panel.ident >= Foil.isol.stgpanel])
+	x_wake = np.array([panel.midx for panel in wakepanels])
 
 	Foil.isol.chorddist = np.array([x_sup, x_inf, x_wake],dtype = object)
 
@@ -393,12 +393,12 @@ def trailing_specs(Foil):
 		tdp : t · p, gives the trailing edge vortex intensity
 
 	"""
-	panneles = Foil.geom.panneles			# airfoil panels
-	t1 = -1*panneles[0].t 				#  first pannel direction vector (lower trailing edge)
-	t2 = 1*panneles[-2].t  				# last pannel direction vector (upper trailing edge)
+	paneles = Foil.geom.paneles			# airfoil panels
+	t1 = -1*paneles[0].t 				#  first panel direction vector (lower trailing edge)
+	t2 = 1*paneles[-2].t  				# last panel direction vector (upper trailing edge)
 	t = 0.5*(t1+t2)
 	t = t/np.linalg.norm(t) 
-	s = -1*panneles[-1].t*panneles[-1].len
+	s = -1*paneles[-1].t*paneles[-1].len
 	hTE = -s[0]*t[1] + s[1]*t[0] 
 	dtdx = t1[0]*t2[1] - t2[0]*t1[1] 
 	p = s/np.linalg.norm(s)
@@ -409,7 +409,7 @@ def trailing_specs(Foil):
 
 def panel_division_CVPM(coord, N, foil_name):
 	"""
-	Divides the airfoil in the especified pannel number for CVPM.
+	Divides the airfoil in the especified panel number for CVPM.
 
 	INPUT:
 	coord : foil coordinate array (2 x N)
@@ -472,11 +472,11 @@ def panel_division_CVPM(coord, N, foil_name):
 	for item in ypi:
 		yp.append(item)
 
-	# Panneling
+	# paneling
 	panels = np.empty(N, dtype=object)
 	coords = np.array(list(zip(xp, yp)))
 	for i in range(N):
-		panels[i] = Pannel(coords[i], coords[i+1], i+1)
+		panels[i] = Panel(coords[i], coords[i+1], i+1)
 
 
 	return panels, coords

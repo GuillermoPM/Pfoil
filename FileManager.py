@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 from os import mkdir
 
 
-# Directorios
-dir_ppal = 'C:/Pfoil/'						# Directorio principal
-dir_resultados = 'C:/Pfoil/Resultados/'		# Directorio resultados
-dir_perfiles = 'C:/Pfoil/Perfiles/'			# Directorio import archivos de perfil
+# Paths
+dir_ppal = 'C:/Pfoil/'						# Main path
+dir_resultados = 'C:/Pfoil/Results/'		# Results path
+dir_perfiles = 'C:/Pfoil/Airfoils/'			# Foil path
 
 def OpenFile(foil_name):
 	with open(dir_perfiles + foil_name) as file_name:
