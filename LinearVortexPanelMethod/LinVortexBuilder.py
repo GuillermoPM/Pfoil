@@ -34,17 +34,6 @@ def LVSolver(Foil):
 
 def vortex_builder(Foil, alpha):
 	"""
-		Resolución del sistema de ecuaciones matricial que permite calcular la matriz que mapea los valores de las
-		intensidades de los vórtices con los distintos puntos del perfil.
-
-		INPUT
-		Foil : airfoil
-		alpha : angle of attack
-
-		OUTPUT
-		Foil.isol.vMatrix : vortex intensity mapping matrix
-		Foil.isol.gamref : vortex intensity distribution
-		Foil.isol.gam : vortex intensity distribution for the indicated angle of attack
 	"""
 	paneles = Foil.geom.paneles
 	N = Foil.N         # number of points
