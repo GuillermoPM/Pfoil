@@ -32,19 +32,6 @@ def LVSolver(Foil):
 
 def vortex_builder(Foil, alpha):
 	"""
-<<<<<<< Updated upstream
-=======
-		Calculates the matrix that maps the vortex intensity distribution with the different airfoil points.
-
-		INPUT
-		Foil : airfoil
-		alpha : angle of attack
-
-		OUTPUT
-		Foil.isol.vMatrix : vortex intensity mapping matrix
-		Foil.isol.gamref : vortex intensity distribution
-		Foil.isol.gam : vortex intensity distribution for the indicated angle of attack
->>>>>>> Stashed changes
 	"""
 	panels = Foil.geom.panels
 	N = Foil.N   
