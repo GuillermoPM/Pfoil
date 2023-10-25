@@ -209,8 +209,7 @@ def residual_station(param, x, U, Aux):
 	# shape parameter
 	H1, H1_U1 = get_H(U[:, 0])
 	H2, H2_U2 = get_H(U[:, 1])
-	H = 0.5 * (H1 + H2)
-	H_U = 0.5 * np.concatenate([H1_U1, H2_U2])
+	H, H_U = 0.5 * (H1 + H2), 0.5 * np.concatenate([H1_U1, H2_U2])
 
 	# Hstar = KE shape parameter, averaged
 	Hs1, Hs1_U1 = get_Hs(U1, param)

@@ -200,16 +200,6 @@ def get_H(U):
 
 
 def get_Mach2(U, param):
-	# calculates squared Mach number
-	# INPUT
-	#   U     : state vector [th; ds; sa; ue]
-	#   param : parameter dictionary
-	# OUTPUT
-	#   M2, M2_U : squared Mach number and its linearization w.r.t. U (1x4)
-	# DETAILS
-	#   Uses constant total enthalpy from param.H0
-	#   The speed of sound varies; depends on enthalpy, which depends on speed
-	#   The compressible edge speed must be used
 
 	if (param.Minf > 0):
 		H0 = param.H0
