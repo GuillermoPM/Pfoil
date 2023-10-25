@@ -57,8 +57,7 @@ def get_Hss(U, param):
 	"""
 	M2, M2_U = get_Mach2(U, param)  # squared edge Mach number
 	Hk, Hk_U = get_Hk(U, param)
-	num = 0.064 / (Hk - 0.8) + 0.251
-	num_U = -0.064 / (Hk - 0.8)**2 * Hk_U
+	num, num_U = 0.064 / (Hk - 0.8) + 0.251, -0.064 / (Hk - 0.8)**2 * Hk_U
 	Hss = M2 * num
 	Hss_U = M2_U * num + M2 * num_U
 	return Hss, Hss_U
