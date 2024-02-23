@@ -35,9 +35,9 @@ class Foil():
 			self.ue = np.empty(3, dtype=object)
 			self.uewi = np.array([])
 			self.uewiref = np.array([])
-			self.sourceMatrix = type(object)  
-			self.vMatrix = type(object)
-			self.chorddist = np.array([],dtype=object)
+			self.sourceMatrix = type(object)  # source matrix
+			self.vMatrix = type(object) # vortex matrix
+			self.chorddist = np.array([],dtype=object) # distance in chord length
 	
 	class ConstantVortexSol:
 		"CVPM solution values and parameters"
