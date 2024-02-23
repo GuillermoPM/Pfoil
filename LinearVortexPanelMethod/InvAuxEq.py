@@ -3,12 +3,11 @@ import numpy as np
 
 def get_cp(u, param):
 	"""
-        Cálculo del coeficiente de presión incluyendo la corrección de Karman - Tsien en caso de flujo
-        compresible.\n
-	
-        INPUT
-            u : velocidad incompresible en un punto
-            param : subclase parámetros del perfil
+		Gives Cp using Karman - Tsien correction in case of compressible flow.\n
+
+		INPUT
+			u : incompresible velocity at the node.
+			param : foil parameters subclass
     
     """
 
@@ -28,14 +27,11 @@ def get_cp(u, param):
 
 def get_uk(u, param):
 	"""
-        Calcula la velocidad corregida en caso de compresibilidad, y su linealización.
-	
-        INPUT
-            u : velocidad incompresible en un punto
-            param : subclase parámetros del perfil
-    
+		Gives corrected velocity in the compressible case and the linealization.
 
-    
+		INPUT
+			u : incompresible velocity at the node.
+			param : foil parameters subclass   
     """
 
 	if (param.Minf > 0):
@@ -53,15 +49,18 @@ def get_uk(u, param):
 
 
 def get_cf(U, param):
-	# calculates cf = skin friction coefficient, from U
-	# INPUT
-	#   U     : state vector [th; ds; sa; ue]
-	#   param : parameter structure
-	# OUTPUT
-	#   cf, cf_U : skin friction coefficient and its linearization w.r.t. U (1x4)
-	# DETAILS
-	#   cf is the local skin friction coefficient = tau/(0.5*rho*ue^2)
-	#   Correlations are used based on Hk and Re_theta
+	"""
+		Calculates skin friction coefficient from state vector.
+
+		INPUT
+			U : state vector
+			param : foil parameters
+		
+		OUTPUT
+			cf, cf_U : skin friction coefficient and linearization
+
+	
+	"""
 
 	if param.wake:
 		cf = 0

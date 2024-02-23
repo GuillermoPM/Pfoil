@@ -10,6 +10,8 @@ import scipy.integrate as integrate
 def KuttaMatrix(Foil):
 	"""
 	Calculates the Kutta condition for each pannel.
+	INPUT:
+		Foil : foil data.
 	"""
 	panels = Foil.geom.panels
 	N = Foil.N
@@ -65,7 +67,7 @@ def KuttaMatrix(Foil):
 																																			   + (panels[-1].midy-(panel.ymin+s*np.cos(panel.beta)))*(np.sin(panels[-1].beta))) /
 																																			  ((panels[-1].midx-(panel.xmin-s*np.sin(panel.beta)))**2 +
 																																			   (panels[-1].midy-(panel.ymin+s*np.cos(panel.beta)))**2), 0, panel.len)[0])
-	Foil.cvortm.kuttaCond = KuttaCond
+	Foil.cvortm.kuttaCond = KuttaCond # save kutta condition in foil class
 
 
 def TangVel(Foil):

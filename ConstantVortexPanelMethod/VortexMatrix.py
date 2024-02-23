@@ -12,8 +12,8 @@ def VortexMatrix(Foil):
 	Gives the column array that maps the vortex intensity with the pannels. The intensity is constant and its influence is calculated.
 
 	"""
-	panels = Foil.geom.panels
-	N = Foil.N
+	panels = Foil.geom.panels # panel geometry
+	N = Foil.N	# node number
 	
 	VortexM = np.zeros(N, float)
 	for i, panel_i in enumerate(panels):
