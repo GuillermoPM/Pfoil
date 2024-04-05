@@ -6,7 +6,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-
+from Pfoil import *
 # Font is created for the rest of the file
 font = {'family': 'calibri',
 		'size': 12}
@@ -141,7 +141,7 @@ def PlotBlayer(Foil):
   
 def FoilPlot(Foil):
 	"""
-		Foil plot with the center of momentum and transition points
+		Plots the foil with the center of momentum.
 	
 	"""
 
@@ -151,12 +151,8 @@ def FoilPlot(Foil):
 	plt.plot(Foil.geom.coord[:, 0], Foil.geom.coord[:, 1],'-ko',markersize= 3)
 	plt.plot(Foil.geom.xref[0],Foil.geom.xref[1],'ro')
 	plt.axhline(0, color='black', linewidth=1)
-	if Foil.geom.special and Foil.geom.spgeom == 0:
-		plt.ylim(-(Foil.geom.cylRadious+0.4), Foil.geom.cylRadious+0.4)
-		plt.xlim(-0.05, 2)
-	else:
-		plt.xlim(-0.01,1.01)
-		plt.ylim(-0.2,0.2)
+	plt.ylim(-0.4,0.4)
+	plt.xlim(-0.05, 1.1)
 
 	plt.axis('off')
 	plt.legend(["Foil geometry","Center of momentum","x axis"])

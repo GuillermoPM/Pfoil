@@ -103,8 +103,8 @@ class Foil():
 			self.panels = np.array([])  			# foil panels
 			self.wakepanels = np.array([])  		# wakepanels
 			self.totalpanels = np.concatenate((self.panels, self.wakepanels))
-			self.spline_sup = type(object)
-			self.spline_inf = type(object)
+			self.spline_sup = type(interp.CubicSpline)
+			self.spline_inf = type(interp.CubicSpline)
 			self.presc = True
 			self.name = "NACA"
 			self.nPoints = 0
