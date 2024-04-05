@@ -31,7 +31,7 @@ class GUI_parameters:
 		self.Re = 10000					# Reynolds number		
 		self.geomname = "NACA"			# Geometry name
 		self.fromfile = False			# Flag that shows if the geometry is from a dat file
-		self.foil_file = type(object)	# dat file directory
+		self.foil_file = "direc"		# dat file directory
 
 
 class VirtualTerminal(object):
