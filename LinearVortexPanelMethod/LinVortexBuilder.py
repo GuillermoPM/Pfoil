@@ -1,12 +1,10 @@
 """
-    En este archivo se establecen las diferentes funciones requeridas para el cálculo de la solución no viscosa, así como
-    otras que son comunes con el caso viscoso.
+	Inviscid solution functions and base functions for viscous case.
     
     @Author: Guillermo Peña Martínez
     @Date: 04/05/2023
 """
 import numpy as np
-import sys
 
 from LinearVortexPanelMethod.InvAuxEq import *
 from LinearVortexPanelMethod.StreamFuncEq import *
@@ -30,17 +28,22 @@ def LVSolver(Foil):
 	Foil.glob.conv = True  # no coupled system ... convergence is guaranteed
 
 
-def vortex_builder(Foil, alpha):
+def vortex_builder(foil, alpha):
 	"""
+		Distributes the vortices around the airfoil and calculates the circulation that is generated.
+
+		Input:
+			- foil : airfoil class
+			- alpha : angle of attack
 	"""
-	panels = Foil.geom.panels
-	N = Foil.N   
-	coord = Foil.geom.coord
+	panels = foil.geom.panels
+	N = foil.N   
+	coord = foil.geom.coord
 
 	A = np.zeros((N+2, N+2))  # influence matrix
 	rhs = np.zeros((N+2, 2))  # right-hand sides for 0,90
-	_, hTE, _, tcp, tdp = trailing_specs(Foil)  # trailing-edge info
-	nogap = (abs(hTE) < 1e-10*Foil.geom.chord)  # indicates no TE gap
+	_, hTE, _, tcp, tdp = trailing_specs(foil)  # trailing-edge info
+	nogap = (abs(hTE) < 1e-10*foil.geom.chord)  # indicates no TE gap
 
 	# Influence matrix and rhs of equation
 	for i, panel_i in enumerate(panels):
@@ -72,12 +75,12 @@ def vortex_builder(Foil, alpha):
 	A[N+1, N] = 1
 
 	# Solving the system
-	Foil.isol.vMatrix = A
-	g = np.linalg.solve(Foil.isol.vMatrix, rhs)
+	foil.isol.vMatrix = A
+	g = np.linalg.solve(foil.isol.vMatrix, rhs)
 
-	Foil.isol.gamref = np.array(g[:-1, :])
-	Foil.isol.gam = Foil.isol.gamref[:, 0] * np.cos(np.deg2rad(
-		alpha)) + Foil.isol.gamref[:, 1] * np.sin(np.deg2rad(alpha))
+	foil.isol.gamref = np.array(g[:-1, :])
+	foil.isol.gam = foil.isol.gamref[:, 0] * np.cos(np.deg2rad(
+		alpha)) + foil.isol.gamref[:, 1] * np.sin(np.deg2rad(alpha))
 
 
 def inviscid_velocity(Foil, gamma, Vinf, alpha, x):
@@ -122,33 +125,33 @@ def inviscid_velocity(Foil, gamma, Vinf, alpha, x):
 	return V, V_G
 
 
-def calc_force(Foil):
+def calc_force(foil):
 	"""
 	
 	
 	
 	"""
-	N = Foil.N + 1  # foil points
-	coord = Foil.geom.coord
-	xref = Foil.geom.xref
-	panels = Foil.geom.panels
-	Vinf = Foil.param.Vinf
-	rho = Foil.oper.rho
-	alpha = Foil.oper.alpha
+	N = foil.N + 1  # foil points
+	coord = foil.geom.coord
+	xref = foil.geom.xref
+	panels = foil.geom.panels
+	Vinf = foil.param.Vinf
+	rho = foil.oper.rho
+	alpha = foil.oper.alpha
 	alpha_vector = np.array(
 		[np.cos(np.deg2rad(alpha)), np.sin(np.deg2rad(alpha))])
 	qinf = 0.5 * rho * Vinf ** 2  # dynamic pressure
 
 	# calculate the pressure coefficient at each node
-	if Foil.oper.viscous:
-		ue = Foil.glob.U[3, :]
+	if foil.oper.viscous:
+		ue = foil.glob.U[3, :]
 	else:
-		ue = get_ueinv(Foil).T
+		ue = get_ueinv(foil).T
 
-	cp, cp_ue = get_cp(ue, Foil.param)
-	Foil.post.cp = cp
-	Foil.post.cpi = get_cp(get_ueinv(Foil).T, Foil.param)[0]  # inviscid cp
-	Foil.post.ue = ue
+	cp, cp_ue = get_cp(ue, foil.param)
+	foil.post.cp = cp
+	foil.post.cpi = get_cp(get_ueinv(foil).T, foil.param)[0]  # inviscid cp
+	foil.post.ue = ue
 
 	# Inicialización de los coeficientes:
 	cl = cl_alpha = cm = cdpi = 0
@@ -176,41 +179,41 @@ def calc_force(Foil):
 		cm += cp1 * dx1nds / 3 + cp1 * dx2nds / 6 + cp2 * dx1nds / 6 + cp2 * dx2nds / 3
 		cdpi += dz * panel.cpi
 
-	Foil.post.cl = cl
+	foil.post.cl = cl
 
-	Foil.post.cl_ue = cl_ue
-	Foil.post.cl_alpha = cl_alpha
-	Foil.post.cm = cm
-	Foil.post.cdpi = cdpi
+	foil.post.cl_ue = cl_ue
+	foil.post.cl_alpha = cl_alpha
+	foil.post.cm = cm
+	foil.post.cdpi = cdpi
 
 	# viscous contributions
 	cd = 0
 	cdf = 0
-	if Foil.oper.viscous:
+	if foil.oper.viscous:
 
 		# Squire-Young relation for total drag (extrapolates theta from end of wake)
-		iw = Foil.vsol.Is[2][-1]  # station at the end of the wake
-		U = Foil.glob.U[:, iw]
+		iw = foil.vsol.Is[2][-1]  # station at the end of the wake
+		U = foil.glob.U[:, iw]
 		H = U[1] / U[0]
-		ue = get_uk(U[3], Foil.param)[0]  # state
+		ue = get_uk(U[3], foil.param)[0]  # state
 		cd = 2.0 * U[0] * (ue / Vinf) ** ((5 + H) / 2.0)
 
 		# skin friction drag
 		Df = 0.0
 		ue1 = ue2 = cf1 = cf2 = rho1 = rho2 = 0
 		for isurf in range(2):
-			Is = Foil.vsol.Is[isurf]
-			param = build_param(Foil, isurf)
-			param = station_param(Foil, param, Is[0])
+			Is = foil.vsol.Is[isurf]
+			param = build_param(foil, isurf)
+			param = station_param(foil, param, Is[0])
 			cf1 = 0.0  # get_cf(M.glob.U[:,Is[0]], param) # first cf value
 			ue1 = 0.0  # get_uk(M.glob.U[3,Is[0]], param)
 			rho1 = rho
-			x1 = Foil.isol.xstag
+			x1 = foil.isol.xstag
 			for i in range(len(Is)):
-				param = station_param(Foil, param, Is[i])
-				cf2 = get_cf(Foil.glob.U[:, Is[i]], param)[0]  # get cf value
-				ue2 = get_uk(Foil.glob.U[3, Is[i]], param)[0]
-				rho2 = get_rho(Foil.glob.U[:, Is[i]], param)[0]
+				param = station_param(foil, param, Is[i])
+				cf2 = get_cf(foil.glob.U[:, Is[i]], param)[0]  # get cf value
+				ue2 = get_uk(foil.glob.U[3, Is[i]], param)[0]
+				rho2 = get_rho(foil.glob.U[:, Is[i]], param)[0]
 				x2 = coord[Is[i], :]
 				dxv = x2 - x1
 				dx = dxv[0] * np.cos(alpha) + dxv[1] * np.sin(alpha)
@@ -222,19 +225,19 @@ def calc_force(Foil):
 		cdf = Df / qinf
 
 	# store results
-	Foil.post.cd = cd
-	Foil.post.cdf = abs(cdf)
-	Foil.post.cdp = cd - abs(cdf)
+	foil.post.cd = cd
+	foil.post.cdf = abs(cdf)
+	foil.post.cdp = cd - abs(cdf)
 
-	if Foil.oper.viscous:
-		if Foil.vsol.Xt[0, 1] ==0:
-			Foil.vsol.Xt[0, 1] = 1
-		print("Viscous results for alpha = ", Foil.oper.alpha, ": \n", "cl = ", Foil.post.cl, "\n cd = ",
-				Foil.post.cd, "\n cdpi = ", Foil.post.cdpi, "\n cdf = ", Foil.post.cdf, "\n cdp = ", Foil.post.cdp, "\n cm = ", Foil.post.cm, "\n Xt intrados = ", Foil.vsol.Xt[0, 1], "\n Xt extrados = ", Foil.vsol.Xt[1, 1])
+	if foil.oper.viscous:
+		if foil.vsol.Xt[0, 1] ==0:
+			foil.vsol.Xt[0, 1] = 1
+		print("Viscous results for alpha = ", foil.oper.alpha, ": \n", "cl = ", foil.post.cl, "\n cd = ",
+				foil.post.cd, "\n cdpi = ", foil.post.cdpi, "\n cdf = ", foil.post.cdf, "\n cdp = ", foil.post.cdp, "\n cm = ", foil.post.cm, "\n Xt intrados = ", foil.vsol.Xt[0, 1], "\n Xt extrados = ", foil.vsol.Xt[1, 1])
 
 	else:
-		print("Resultados no viscosos para alpha = ", Foil.oper.alpha, ": \n",
-		      "cl = ", Foil.post.cl, "\n cdp = ", Foil.post.cdpi, "\n cm = ", Foil.post.cm)
+		print("Resultados no viscosos para alpha = ", foil.oper.alpha, ": \n",
+		      "cl = ", foil.post.cl, "\n cdp = ", foil.post.cdpi, "\n cm = ", foil.post.cm)
 
 
 def get_ueinv(M):
@@ -261,24 +264,22 @@ def get_ueinv(M):
 	return ueinv
 
 
-def get_ueinvref(M):
+def get_ueinvref(foil):
 	"""
-	Computes 0, 90-degree inviscid tangential velocities at every node.
+	Computes 0, 90-degree inviscid tangential velocities at every node. Uses gamref for the airfoil, uewiref for the wake (if exists)
 
-	Args:
-	- M: mfoil structure
+	Input:
+	- foil: airfoil class
 
-	Returns:
+	Output:
 	- ueinvref: 0,90 inviscid tangential velocity at all points (N+Nw)x2
-
-	Details:
-	- Uses gamref for the airfoil, uewiref for the wake (if exists)
+	
 	"""
-	assert M.isol.gam, 'No inviscid solution'
-	uearef = M.isol.sgnue.T * M.isol.gamref  # airfoil
+	assert foil.isol.gam, 'No inviscid solution'
+	uearef = foil.isol.sgnue.T * foil.isol.gamref  # airfoil
 	uewref = []
-	if M.oper.viscous and M.wake.N > 0:
-		uewref = M.isol.uewiref  # wake
+	if foil.oper.viscous and foil.wake.N > 0:
+		uewref = foil.isol.uewiref  # wake
 		uewref[0, :] = uearef[-1, :]  # continuity of upper surface and wake
 	ueinvref = np.vstack((uearef, uewref))
 	return ueinvref

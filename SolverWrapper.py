@@ -74,24 +74,21 @@ def PfoilExe(Foil, GUIParameters):
 		- Model 2 : LVPM + Transpiration Method (viscous)
 	"""
 
-	foil = Foil
+	Foil.oper.model = GUIParameters.model   # model
+	Foil.oper.alpha = GUIParameters.alpha   # angle of attack
+	Foil.oper.Re = GUIParameters.Re         # Reynolds number
+	Foil.oper.Ma = GUIParameters.Mach		# Mach
 
-
-	foil.oper.model = GUIParameters.model   # model
-	foil.oper.alpha = GUIParameters.alpha   # angle of attack
-	foil.oper.Re = GUIParameters.Re         # Reynolds number
-	foil.oper.Ma = GUIParameters.Mach		# Mach
-
-	Sval(foil)								# spline length
-	build_term(foil)						# thermodynamics
+	Sval(Foil)								# spline length
+	build_term(Foil)						# thermodynamics
 	if GUIParameters.model == 0:
-		CVPM_solver(foil)
+		CVPM_solver(Foil)
 	elif GUIParameters.model == 1:
-		LVSolver(foil)
+		LVSolver(Foil)
 	else:
-		ViscousSolver(foil)
+		ViscousSolver(Foil)
 	
-	FolderDir(foil)			# creates a folder for the foil in case there's not already one
-	DataSave(foil)			# Excel file 
+	FolderDir(Foil)			# creates a folder for the foil in case there's not already one
+	DataSave(Foil)			# Excel file 
 	
-	return foil
+	return Foil

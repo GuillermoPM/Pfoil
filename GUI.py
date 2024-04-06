@@ -65,10 +65,10 @@ class GUI():
 		self.root.grid_rowconfigure(1, minsize=50, weight=1)
 
 		# Setting the frames in the main window
-		self.frame1.grid(row=0, column=0,sticky="nsew")
-		self.frame2.grid(row=0, column=1,sticky="nsew")
-		self.frame3.grid(row=1, column=0,sticky="nsew")
-		self.frame4.grid(row=1, column=1,sticky="nsew")
+		self.frame1.grid(row=0, column=0,	sticky="nsew")
+		self.frame2.grid(row=0, column=1,	sticky="nsew")
+		self.frame3.grid(row=1, column=0,	sticky="nsew")
+		self.frame4.grid(row=1, column=1,	sticky="nsew")
 
 		self.emptyframe = tk.Frame(self.frame2,width=0,height=0)
 		self.emptyframe.grid(row=0, column= 1)

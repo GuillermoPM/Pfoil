@@ -346,7 +346,7 @@ def Sval(Foil):
 	# Variable definitions
 	geom_sup = Foil.geom.spline_sup 		# lower spline
 	geom_inf = Foil.geom.spline_inf 		# upper spline
-	paneles = Foil.geom.paneles 			# panels
+	panels = Foil.geom.panels 			# panels
 	wakepanels = Foil.geom.wakepanels 		# wake panels
 	xPoints = Foil.geom.coord[:, 0] 		# x coordinates of the different nodes
 
@@ -365,15 +365,15 @@ def Sval(Foil):
 	s_stg = s_totSup + SplineLen(geom_inf, Foil.isol.x_stg)
 	Foil.isol.xi = np.array(abs(s_stg - Foil.isol.svalue))
 
-	x_sup1 = [panel.midx for panel in paneles if panel.ident < int(Foil.N/2)]
+	x_sup1 = [panel.midx for panel in panels if panel.ident < int(Foil.N/2)]
 	x_sup1.reverse()
 	x_sup1 = np.array(x_sup1)
-	x_sup2 = [panel.midx for panel in paneles if int(Foil.N/2) <= panel.ident <= Foil.isol.stgpanel]
+	x_sup2 = [panel.midx for panel in panels if int(Foil.N/2) <= panel.ident <= Foil.isol.stgpanel]
 	x_sup2.reverse()
 	x_sup2 = np.array(x_sup2)
 	x_sup = np.concatenate((x_sup1, x_sup2))
 	x_inf = np.array(
-		[panel.midx for panel in paneles if panel.ident >= Foil.isol.stgpanel])
+		[panel.midx for panel in panels if panel.ident >= Foil.isol.stgpanel])
 	x_wake = np.array([panel.midx for panel in wakepanels])
 
 	Foil.isol.chorddist = np.array([x_sup, x_inf, x_wake],dtype = object)
@@ -393,12 +393,12 @@ def trailing_specs(Foil):
 		tdp : t · p, gives the trailing edge vortex intensity
 
 	"""
-	paneles = Foil.geom.paneles			# airfoil panels
-	t1 = -1*paneles[0].t 				#  first panel direction vector (lower trailing edge)
-	t2 = 1*paneles[-2].t  				# last panel direction vector (upper trailing edge)
+	panels = Foil.geom.panels			# airfoil panels
+	t1 = -1*panels[0].t 				#  first panel direction vector (lower trailing edge)
+	t2 = 1*panels[-2].t  				# last panel direction vector (upper trailing edge)
 	t = 0.5*(t1+t2)
 	t = t/np.linalg.norm(t) 
-	s = -1*paneles[-1].t*paneles[-1].len
+	s = -1*panels[-1].t*panels[-1].len
 	hTE = -s[0]*t[1] + s[1]*t[0] 
 	dtdx = t1[0]*t2[1] - t2[0]*t1[1] 
 	p = s/np.linalg.norm(s)
