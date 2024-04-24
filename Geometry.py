@@ -155,7 +155,7 @@ def SplineLen(spline, xlimit):
 		
 	return s
 
-def panel_division(coord, N, foil_name, presc):
+def panel_division(coord, N, foil_name):
 	"""
 	Discretizes the geometry in the number of panels indicated
 

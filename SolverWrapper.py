@@ -34,8 +34,7 @@ def PfoilBuilder(GUIParameters):
 			paneles, coords = panel_division(
 						coord = naca_foil,
 						N=GUIParameters.nPanels,
-						foil_name=GUIParameters.nacafoil,
-						presc = GUIParameters.presc)
+						foil_name=GUIParameters.nacafoil)
 		
 		foil = Foil(coord=coords, N=GUIParameters.nPanels,
 		            foil=GUIParameters.nacafoil)
@@ -49,8 +48,7 @@ def PfoilBuilder(GUIParameters):
 		paneles, coords = panel_division(
                     coord=file_coords,
                     N=GUIParameters.nPanels,
-                    foil_name=GUIParameters.nacafoil,
-               		presc=GUIParameters.presc)
+                    foil_name=GUIParameters.nacafoil)
 		foil = Foil(coord=coords, N=GUIParameters.nPanels,
 		            foil=GUIParameters.nacafoil)
 		foil.geom.panels = paneles

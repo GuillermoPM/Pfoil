@@ -227,5 +227,4 @@ class Foil():
 			self.geom.panels = panel_division(
 				coord=self.geom.coord,
 				N=self.N,
-				foil_name=self.geom.foil_name,
-				presc=self.geom.presc)[0]
+				foil_name=self.geom.foil_name)[0]
