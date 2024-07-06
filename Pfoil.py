@@ -5,12 +5,9 @@
 """
 import os
 import sys
-
-constantVPM_path = os.path.abspath(os.path.join('..','ConstantVortexPanelMethod'))
-sys.path.append(constantVPM_path)
-
+from scipy import interpolate as interp
 import numpy as np
-from Geometry import *
+from Geometry import panel_division, panel_division_CVPM, SplineGeom
 
 class Foil():
 	class InvSol:
@@ -103,10 +100,9 @@ class Foil():
 			self.panels = np.array([])  			# foil panels
 			self.wakepanels = np.array([])  		# wakepanels
 			self.totalpanels = np.concatenate((self.panels, self.wakepanels))
-			self.spline_sup = type(interp.CubicSpline)
-			self.spline_inf = type(interp.CubicSpline)
+			self.spline_sup = interp._cubic.CubicSpline
+			self.spline_inf = interp._cubic.CubicSpline
 			self.presc = True
-			self.name = "NACA"
 			self.nPoints = 0
 
 	class Results:
@@ -185,6 +181,7 @@ class Foil():
 			self.R_x = np.array([])
 
 	class Data:
+		"Stores the geometry directory for data saving"
 		def __init__(self):
 			self.foil_dir = ''
 
@@ -210,7 +207,7 @@ class Foil():
 		self.FoilSpline()
 			
 	def FoilSpline(self):	
-		self.geom.spline_sup, self.geom.spline_inf = SplineGeom(
+		self.geom.spline_sup, self.geom.spline_inf = SplineGeom( # type: ignore
 			coord=self.geom.coord,
 			foil_name=self.geom.foil_name)
 

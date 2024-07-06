@@ -23,13 +23,13 @@ class Panel():
 
 	>>> Panel(coordmin, coordmax, identnumber)
 
-	### Args:
+	ARGS:
 
-	(xmin, ymin) -> First panel point
-	(xmax, ymax) -> Second panel point
-	i -> Identification number
+	(xmin, ymin) : First panel point
+	(xmax, ymax) : Second panel point
+	i : Identification number
 	
-	### Params:
+	PARAMS:
 
 	beta : Angle between the normal and the horizontal \n
 	lug : Flag for the position (upper or lower) \n
@@ -130,6 +130,8 @@ def SplineGeom(coord, foil_name):
 	else:
 		spline_sup = interp.PchipInterpolator(xsup, ysup)
 		spline_inf = interp.PchipInterpolator(xinf, yinf)
+
+		type(spline_sup)
 
 	return spline_sup, spline_inf
 
