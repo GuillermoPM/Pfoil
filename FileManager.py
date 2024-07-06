@@ -1,12 +1,20 @@
 import numpy as np
 import pandas as pd
 from os import mkdir
+import os
 
+# Get the current file path
+file_path = os.path.abspath(__file__)
+
+# Get the directory of the current file
+dir_main = os.path.dirname(file_path)
+
+# Update the main directory path
+dir_main = dir_main.replace('\\', '/') + '/'
 
 # Paths
-dir_main = 'C:/Pfoil/'					# Main path
-dir_results = 'C:/Pfoil/Results/'		# Results path
-dir_airfoils = 'C:/Pfoil/Airfoils/'		# Foil path
+dir_results = dir_main + 'Results'		# Results path
+dir_airfoils = dir_main + 'Airfoils'    # Foil path
 
 def OpenFile(foil_name):
 	with open(dir_airfoils + foil_name) as file_name:
@@ -35,7 +43,7 @@ def DataSave(Foil):
 		else:
 			df = pd.DataFrame(
 				{'Cooords X': np.array([panel.midx for panel in Foil.geom.paneles]), 'Pressure Coef': Foil.cvortm.Cpi})
-			writer = pd.ExcelWriter(Foil.data.foil_dir + '/' + 'Coeficientes ' + str(
+			writer = pd.ExcelWriter(Foil.data.foil_dir + '/' + 'Coefficients ' + str(
                             Foil.oper.alpha) + ' deg' + ' '+str(Foil.geom.foil_name) + ' CVPM' + '.xlsx', engine='xlsxwriter')
 	
 	# Creates the Excel sheet from the dataframe

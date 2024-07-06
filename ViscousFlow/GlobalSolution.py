@@ -10,7 +10,6 @@ def solve_glob(M):
 	"""
 	
 	Nsys = M.glob.Nsys  # number of dofs
-	docl = M.oper.givencl  # 1 if in cl-constrained mode
 
 	# get edge velocity and displacement thickness
 	ue = M.glob.U[3, :].reshape(-1, 1)
@@ -24,7 +23,7 @@ def solve_glob(M):
 	# inviscid edge velocity on the airfoil and wake
 	ueinv = get_ueinv(M)
 
-	R_V = sp.sparse.lil_matrix((4 * Nsys + docl, 4 * Nsys + docl))
+	R_V = sp.sparse.lil_matrix((4 * Nsys, 4 * Nsys))
 
 	# state indices in the global system
 	Ids = np.arange(1, 4 * Nsys + 1, 4)  # delta star indices
@@ -42,20 +41,11 @@ def solve_glob(M):
 	R_V[I.reshape(-1, 1), Iue] = np.identity(Nsys, dtype=float) - np.matmul(M.vsol.ue_m, np.diag(unresh_ds))
 	R_V[I.reshape(-1, 1), Ids] = -M.vsol.ue_m @ sp.sparse.diags(np.squeeze(ue))
 
-	if docl:
-		# include cl-alpha residual and Jacobian
-		Rcla, Ru_alpha, Rcla_U = clalpha_residual(M)
-		R = np.vstack((R, Rcla))
-		R_V[I, 4 * Nsys] = Ru_alpha
-		R_V[4 * Nsys, :] = Rcla_U
-
 	# solve system for dU, dalpha
 	dV = -1 * spsolve(R_V, R)
 
 	# store dU, reshaped, in M
 	M.glob.dU = np.reshape(dV[:4 * Nsys], (4, Nsys), order="F")
-	if docl:
-		M.glob.dalpha = dV[-1]
 
 
 def jacobian_add_Rx(M):
@@ -104,23 +94,9 @@ def clalpha_residual(M):
 	"""
 
 	Nsys = M.glob.Nsys   # number of dofs
-	alpha = M.oper.alpha  # angle of attack (deg)
-
-	if (M.oper.givencl):  # cl is prescribed, need to trim alpha
-		Rcla = M.post.cl - M.oper.cltgt   # cl constraint residual
-		Rcla_U = sp.sparse.lil_matrix((1, 4*Nsys))
-		Rcla_U[0, 3*Nsys+1:4*Nsys:4] = M.post.cl_alpha
-		# only airfoil nodes affected
-		Rcla_U[0, 3*Nsys+4:4*Nsys:4] = M.post.cl_ue
-
-		# Ru = ue - [uinv + ue_m*(ds.*ue)], uinv = uinvref*[cos(alpha);sin(alpha)]
-		Ru_alpha = -get_ueinvref(M) @ np.array(
-			[-np.sin(np.deg2rad(alpha)), np.cos(np.deg2rad(alpha))]) * np.pi / 180
-
-	else:  # alpha is prescribed, easy
-		Rcla = 0  # no residual
-		Ru_alpha = np.zeros((Nsys, 1))  # not really, but alpha is not changing
-		Rcla_U = sp.sparse.lil_matrix((1, 4*Nsys))
-		Rcla_U[0, 4*Nsys] = 1
+	Rcla = 0  # no residual
+	Ru_alpha = np.zeros((Nsys, 1))  # not really, but alpha is not changing
+	Rcla_U = sp.sparse.lil_matrix((1, 4*Nsys))
+	Rcla_U[0, 4*Nsys] = 1
 
 	return Rcla, Ru_alpha, Rcla_U.toarray()

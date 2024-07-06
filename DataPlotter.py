@@ -41,9 +41,7 @@ def Cp_plot(Foil):
 			
 		else:
 			cp = Foil.post.cp
-		if Foil.geom.special and Foil.geom.spgeom == 0:
-			x = np.linspace(0,1,Foil.N+1)
-		elif Foil.oper.model ==1:
+		if Foil.oper.model ==1:
 			x = Foil.geom.coord[:,0]
 		else:
 			x = [panel.midx for panel in Foil.geom.paneles]
@@ -100,28 +98,28 @@ def PlotBlayer(Foil):
 
 	ds = Foil.post.ds
 	x,y  = Foil.geom.coord[:,0], Foil.geom.coord[:,1]
-	intrados, extrados, wake = Foil.vsol.Is
-	x_intrados, y_intrados, ds_intrados = x[intrados], y[intrados], ds[intrados]
-	x_extrados, y_extrados, ds_extrados = x[extrados], y[extrados], ds[extrados]
-	y_intrados = y_intrados - ds_intrados
-	y_extrados = y_extrados + ds_extrados
+	lower, upper, wake = Foil.vsol.Is
+	x_lower, y_lower, ds_lower = x[lower], y[lower], ds[lower]
+	x_upper, y_upper, ds_upper = x[upper], y[upper], ds[upper]
+	y_lower = y_lower - ds_lower
+	y_upper = y_upper + ds_upper
 
 	x_wake, y_wake, ds_wake = Foil.wake.x[0, :],  Foil.wake.x[1, :], ds[wake]
-	coef = y_extrados[-1]/ds_wake[0]
+	coef = y_upper[-1]/ds_wake[0]
 	
 	y_wake1 = y_wake - (1-coef)*ds_wake
 	y_wake2 = y_wake + coef*ds_wake
 
-	y_wake1[0] = y_intrados[-1]
-	y_wake2[0] = y_extrados[-1]
+	y_wake1[0] = y_lower[-1]
+	y_wake2[0] = y_upper[-1]
 
 	plt.rcParams['font.family'] = font['family']
 	plt.rcParams['font.size'] = font['size']
 
 	plt.plot(x,y,"-k", linewidth = 3)
 	plt.plot(x_wake,y_wake,"-k", linewidth = 3)
-	plt.plot(x_extrados, y_extrados, "-g", linewidth = 3)
-	plt.plot(x_intrados, y_intrados, "-b", linewidth = 3)
+	plt.plot(x_upper, y_upper, "-g", linewidth = 3)
+	plt.plot(x_lower, y_lower, "-b", linewidth = 3)
 	plt.plot(x_wake,y_wake1,"-r", linewidth = 3)
 	plt.plot(x_wake,y_wake2,"-r", linewidth = 3)
 	plt.scatter(Foil.vsol.Xt[1, 1], Foil.geom.spline_sup(Foil.vsol.Xt[1, 1]), color = "orange")
@@ -156,7 +154,7 @@ def FoilPlot(Foil):
 
 	plt.axis('off')
 	plt.legend(["Foil geometry","Center of momentum","x axis"])
-	text = "Geometry: " + str(Foil.geom.name)
+	text = "Geometry: " + str(Foil.geom.foil_name)
 	plt.text(0.05, 0.95, text, ha='left', va='top', transform=plt.gca().transAxes,
 			bbox=dict(facecolor='yellow', alpha=0.5))
 	plt.show()
@@ -187,16 +185,16 @@ def PlotBlayerParam(Foil,index):
 
 	param = parameters[index]
 
-	param_intrados = param[Is[0]]
-	param_extrados = param[Is[1]]
+	param_lower = param[Is[0]]
+	param_upper = param[Is[1]]
 	param_wake = param[Is[2]]
 
 	plt.xticks(fontproperties=font)
 	plt.yticks(fontproperties=font)
 
 	
-	ax.plot(x_upper, param_extrados, linewidth= 3)
-	ax.plot(x_lower, param_intrados, linewidth=3)
+	ax.plot(x_upper, param_upper, linewidth= 3)
+	ax.plot(x_lower, param_lower, linewidth=3)
 	ax.plot(x_wake,param_wake, linewidth = 3)
 
 	ax.legend(["Upper","Lower","Wake"])

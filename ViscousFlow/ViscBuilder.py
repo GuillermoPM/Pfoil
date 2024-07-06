@@ -77,7 +77,7 @@ def build_wake(Foil):
 	xy1 = Foil.geom.coord[0, :]
 	xyN = Foil.geom.coord[-1, :]  # airfoil TE points
 
-	TE_panel = Foil.geom.paneles[-1]
+	TE_panel = Foil.geom.panels[-1]
 	t = np.flip(-1*TE_panel.t*TE_panel.len, axis = 0)
 	n = np.flip(TE_panel.n*TE_panel.len, axis = 0)
 
@@ -119,7 +119,7 @@ def build_wake(Foil):
 
 	# set values
 	Foil.wake.N = Nw
-	Foil.wake.wpaneles = wakepanels
+	Foil.wake.wpanels = wakepanels
 	Foil.wake.x = xyw
 	Foil.wake.s = sw
 	Foil.wake.t = tw
@@ -307,8 +307,8 @@ def calc_ue_m(M):
 
 	assert M.isol.gam.size != 0, 'No inviscid solution'
 	N, Nw = M.N + 1, M.wake.N  # number of points on the airfoil/wake
-	paneles = M.geom.paneles
-	wakepanels = M.wake.wpaneles
+	panels = M.geom.panels
+	wakepanels = M.wake.wpanels
 	assert Nw > 0, 'No wake'
 
 	# Cgam = d(wake uei)/d(gamma)   [Nw x N]   (not sparse)
@@ -320,8 +320,8 @@ def calc_ue_m(M):
 
 	B = np.zeros((N+1, N+Nw-2))  # note, N+Nw-2 = # of panels
 	# loop over points on the airfoil
-	for i, panel_i in enumerate(paneles):
-		for j, panel_j in enumerate(paneles[:-1]):  # loop over airfoil panels
+	for i, panel_i in enumerate(panels):
+		for j, panel_j in enumerate(panels[:-1]):  # loop over airfoil panels
 			B[i, j] = panel_constsource_stream(panel_j=panel_j, panel_i = panel_i)
 		for j, panel_j in enumerate(wakepanels):  # loop over wake panels
 
@@ -355,7 +355,7 @@ def calc_ue_m(M):
 		ti = M.wake.t[:, i]  # point, tangent on wake
 
 		# constant sources on airfoil panels
-		for j, panel_j in enumerate(paneles[:-1]):
+		for j, panel_j in enumerate(panels[:-1]):
 			Csig[i, j] = panel_constsource_velocity(xi, panel_j, ti)
 
 		# piecewise linear sources across wake panel halves (else singular)
@@ -371,9 +371,9 @@ def calc_ue_m(M):
 			if i == j:
 				if j == 0:  # first point: special TE system (three panels meet)
 					# lower surface panel length
-					dl = paneles[0].len
+					dl = panels[0].len
 					# upper surface panel length
-					du = paneles[-2].len
+					du = panels[-2].len
 					# lower panel effect
 					Csig[i, 0] += (0.5/np.pi) * (np.log(dl/d2) + 1)
 					Csig[i, N-1] += (0.5/np.pi) * (np.log(du/d2) + 1)  # upper panel effect
