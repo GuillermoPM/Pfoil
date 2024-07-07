@@ -31,7 +31,7 @@ class Panel():
 	PARAMS:
 
 	beta : Angle between the normal and the horizontal \n
-	lug : Flag for the position (upper or lower) \n
+	loc : Flag for the position (upper or lower) \n
 	intens : panel intensity \n
 	cpi : Pressure coefficient induced by the panel \n
 	Vt : Tangential velocity \n
@@ -79,15 +79,15 @@ class Panel():
 
 		# panel location flag
 		if self.beta <= np.pi:
-			self.lug = 'upper'
+			self.loc = 'upper'
 		elif self.beta > np.pi:
-			self.lug = 'lower'
+			self.loc = 'lower'
 
 	def __repr__(self):
 		return 'panel ' + str(self.ident) + ' : (' + str(self.xmin)+',' +\
 				str(self.ymin)+') ' + '(' + str(self.xmax)+',' + str(self.ymax) + \
-				') ' + ' ' + 'Lugar: ' + \
-				str(self.lug) + '\n' + 'V : ' + str(self.Vi)
+				') ' + ' ' + 'Location: ' + \
+				str(self.loc) + '\n' + 'V : ' + str(self.Vi)
 
 class Wakepanel(Panel):
 	"""
@@ -96,7 +96,7 @@ class Wakepanel(Panel):
 
 	def __init__(self, coordmin, coordmax, i):
 		super().__init__(coordmin, coordmax, i)
-		self.lug = "wake"
+		self.loc = "wake"
 
 	def __repr__(self):
 		return super().__repr__()
@@ -172,7 +172,6 @@ def panel_division(coord, N, foil_name):
 	"""
 	
 	spline_sup, spline_inf = SplineGeom(coord, foil_name)
-
 
 	# x coordinate generation
 	if N%2 == 0:
