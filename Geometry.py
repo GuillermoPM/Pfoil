@@ -15,7 +15,6 @@
 import scipy.interpolate as interp
 from scipy.interpolate import PchipInterpolator
 import numpy as np
-import matplotlib.pyplot as plt
 
 class Panel():
 	"""
