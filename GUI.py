@@ -2,7 +2,7 @@
 	## Graphic User Interface ##
 
 	It allows the user to introduce the parameters for the analysis, choose the panneling model and show
-	the different plots and results. It has been made using the Tkinter module.
+	the different plots and results.
 """
 
 # Generic Python modules
