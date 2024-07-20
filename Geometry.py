@@ -1,6 +1,6 @@
 """
 	## Geometry definition functions
-	>>> panel \n
+	>>> Panel \n
 	>>> Wakepanel \n
 	>>> Segment \n
 	>>> SplineGeom \n
