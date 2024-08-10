@@ -54,7 +54,7 @@ def FolderDir(Foil):
 	"""
 		Creates the folder to store the results in the directory given for the results in case there's not already one
 	"""
-	foil_dir = dir_results + str(Foil.geom.foil_name)
+	foil_dir = dir_results + '/' + str(Foil.geom.foil_name)
 	try:
 		mkdir(foil_dir)
 	except (FileExistsError):
