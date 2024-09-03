@@ -1,5 +1,3 @@
-import os
-import sys
 from scipy import interpolate as interp
 import numpy as np
 from Geometry import panel_division, panel_division_CVPM, SplineGeom

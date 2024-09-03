@@ -233,10 +233,10 @@ def calc_force(foil):
 		if foil.vsol.Xt[0, 1] ==0:
 			foil.vsol.Xt[0, 1] = 1
 		print("Viscous results for alpha = ", foil.oper.alpha, ": \n", "cl = ", foil.post.cl, "\n cd = ",
-				foil.post.cd, "\n cdpi = ", foil.post.cdpi, "\n cdf = ", foil.post.cdf, "\n cdp = ", foil.post.cdp, "\n cm = ", foil.post.cm, "\n Xt intrados = ", foil.vsol.Xt[0, 1], "\n Xt extrados = ", foil.vsol.Xt[1, 1])
+				foil.post.cd, "\n cdpi = ", foil.post.cdpi, "\n cdf = ", foil.post.cdf, "\n cdp = ", foil.post.cdp, "\n cm = ", foil.post.cm, "\n Xt lower = ", foil.vsol.Xt[0, 1], "\n Xt upper = ", foil.vsol.Xt[1, 1])
 
 	else:
-		print("Resultados no viscosos para alpha = ", foil.oper.alpha, ": \n",
+		print("Inviscid results for alpha = ", foil.oper.alpha, ": \n",
 		      "cl = ", foil.post.cl, "\n cdp = ", foil.post.cdpi, "\n cm = ", foil.post.cm)
 
 

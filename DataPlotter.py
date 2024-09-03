@@ -6,6 +6,8 @@ Plots of the results
 @Author: Guillermo Peña Martínez
 @Date: 06/05/2023
 """
+import matplotlib
+matplotlib.use('TkAgg')  # Use the TkAgg backend for interactive plots
 
 import matplotlib.pyplot as plt
 
@@ -41,7 +43,7 @@ def Cp_plot(Foil):
 		if Foil.oper.model == 1:
 			x = Foil.geom.coord[:, 0]
 		else:
-			x = [panel.midx for panel in Foil.geom.paneles]
+			x = [panel.midx for panel in Foil.geom.panels]
 
 		ax.plot(x, cp, linewidth=3)
 		text = f"Coefficients:\ncl: {round(Foil.post.cl, 3)}\ncd: {abs(round(Foil.post.cdpi, 5))}"
@@ -85,7 +87,7 @@ def Cp_plot(Foil):
 	ax.invert_yaxis()
 	plt.axis('off')
 	
-	plt.title("Distribución de Cp", fontdict=font)
+	plt.title("Cp distribution", fontdict=font)
 	plt.show()
 
 def PlotBlayer(Foil):

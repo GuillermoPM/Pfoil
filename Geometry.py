@@ -425,6 +425,8 @@ def panel_division_CVPM(coord, N, foil_name):
 	x, y = coord[:, 0], coord[:, 1]
 	x, y = np.flip(x), np.flip(y)
 
+	if N % 2 != 0: # corrects the number of panels
+		N += 1
 
 	if x[0] != 0.000000:
 		index = np.nonzero(x == 0.0)[0][0]
