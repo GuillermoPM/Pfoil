@@ -240,23 +240,21 @@ def calc_force(foil):
 		      "cl = ", foil.post.cl, "\n cdp = ", foil.post.cdpi, "\n cm = ", foil.post.cm)
 
 
-def get_ueinv(M):
+def get_ueinv(foil):
 	"""
 	Computes invicid tangential velocity at every node
-	INPUT
-		M : mfoil structure
-	OUTPUT
-		ueinv : inviscid velocity at airfoil and wake (if exists) points
-	DETAILS
-		The airfoil velocity is computed directly from gamma
-		The tangential velocity is measured + in the streamwise direction
+	Input:
+	- foil: airfoil class
+
+	Output:
+	- ueinv: inviscid velocity
 	"""
 
-	alpha = M.oper.alpha
+	alpha = foil.oper.alpha
 	cs = np.array([np.cos(np.deg2rad(alpha)), np.sin(np.deg2rad(alpha))])
-	uea = M.isol.sgnue.T * np.dot(M.isol.gamref, cs)  # airfoil
-	if M.oper.viscous and M.wake.N > 0:
-		uew = np.dot(M.isol.uewiref, cs)  # wake
+	uea = foil.isol.sgnue.T * np.dot(foil.isol.gamref, cs)  # airfoil
+	if foil.oper.viscous and foil.wake.N > 0:
+		uew = np.dot(foil.isol.uewiref, cs)  # wake
 		uew[0] = uea[-1]  # ensures continuity of upper surface and wake ue
 	else:
 		uew = []
